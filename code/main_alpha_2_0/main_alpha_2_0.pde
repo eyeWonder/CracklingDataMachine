@@ -4,18 +4,20 @@ import oscP5.*;
 import netP5.*;
 OscP5 oscP5;
 NetAddress myRemoteLocation;
+
 //Why it dosn't work with some urls?
 //Sans Erreur
+
 String[] urls = {
   "http://www.mrmartinweb.com", 
-  "http://boxesandarrows.com/researching-user-experience-a-knowledge-ecology-model/", 
+  //"http://boxesandarrows.com/researching-user-experience-a-knowledge-ecology-model/", 
   "http://slash-paris.com", 
   "http://www.technologyreview.com/", 
   "http://internetactu.blog.lemonde.fr/", 
   "http://www.future-cities-lab.net/", 
   "http://www.theatlantic.com", 
   "http://www.dichtung-digital.org", 
-  "http://www.framablog.org", 
+  //"http://www.framablog.org", 
   "http://archee.qc.ca", 
   "http://www.olats.org", 
   //"http://www.eda.admin.ch/eda/de/home.html", 
@@ -25,9 +27,6 @@ String[] urls = {
   "http://www.reuters.com/finance/markets"
 };
 
-
-int width = 1920;
-int height = 1080;
 boolean finished = false;
 float percent = 0;
 String allData;
@@ -51,7 +50,7 @@ boolean eraser = true;
 
 void setup() {
   //background(0);
-  size(width, height);
+  size(1920, 1080);
   frameRate(0.1);
   oscP5 = new OscP5(this, 12000);
   myRemoteLocation = new NetAddress("127.0.0.1", 57120);
@@ -67,22 +66,21 @@ void setup() {
 
 void draw() {
 
-//  if (t1.verifierIntervalle()) {
-//    thread("loadData");
-//    //in not finished, dónt draw something new!!!
-//  }
-  
+  //  if (t1.verifierIntervalle()) {
+  //    thread("loadData");
+  //    //in not finished, dónt draw something new!!!
+  //  }
+
   /*
   if (t2.verifierIntervalle()){
-    thread("loadData");
-    //in not finished, dónt draw something new!!!
-  }
-*/
+   thread("loadData");
+   //in not finished, dónt draw something new!!!
+   }
+   */
   if (frameCount % 1 == 0) {
     //background(255);
     if (!finished) {
-    } 
-    else {
+    } else {
       background(255);
       String[] words = split(allData, " ");
       Set<String> set = new HashSet<String>();
@@ -93,9 +91,9 @@ void draw() {
       int start1 = 0;
       int count = uniques.length/3;
       int start2 = count-1;
-//      int count2 = count1;
+      //      int count2 = count1;
       int start3 = (count*2)-1;
-//      int count3 = count1;
+      //      int count3 = count1;
       String[] uniques1 = subset(uniques, start1, count);
       String[] uniques2 = subset(uniques, start2, count);
       String[] uniques3 = subset(uniques, start3, count);
@@ -107,7 +105,7 @@ void draw() {
       //RiText.defaultFill(255, 255, 255, 255);
 
       if (d && eraser) {
-        for (int i = 0; i < RiIncrim ; i++) {
+        for (int i = 0; i < RiIncrim; i++) {
           text1[i] = new RiText(this, uniques1[i], xpos+=(i*1.2), ypos+=1);  
           if (xpos>=width) xpos = 0;
           if (ypos>=height) ypos = 0;
@@ -116,7 +114,7 @@ void draw() {
       }
       if (e && eraser) {
 
-        for (int j = 0; j < RiIncrim ; j++) {
+        for (int j = 0; j < RiIncrim; j++) {
           text2[j] = new RiText(this, uniques2[j], xpos+=(j*1.5), ypos+=1.3);  
           if (xpos>=width) xpos = 0;
           if (ypos>=height) ypos = 0;
@@ -124,7 +122,7 @@ void draw() {
         }
       }
       if (f && eraser) {
-        for (int k = 0; k < RiIncrim ; k++) {
+        for (int k = 0; k < RiIncrim; k++) {
           text3[k] = new RiText(this, uniques3[k], xpos+=(k*1.6), ypos+=1.5);  
           if (xpos>=width) xpos = 0;
           if (ypos>=height) ypos = 0;
@@ -148,22 +146,22 @@ void loadData() {
     percent = percent*100;
     println("loading " + percent + " %");
     String[] lines = loadStrings(urls[i]);
-      String allTxt = join(lines, " ");//Combines an array of Strings into one String, each separated by the character(s) used for the separator parameter
-      //data processing
-      String[] words = splitTokens(allTxt, "\t+\n<>=\\-!@#$%^&*(),.;:/?\"\'[]{}|0  123456789");  //delimiter list, pas enlever tous??? --> <>=\\-!@#$%^&*(),.;:/?\"\'[]{}|
-      for (int j = 0; j < words.length; j++) {
-        words[j] = words[j].trim();//Removes whitespace characters from the beginning and end of a String.
-        words[j] = words[j].toLowerCase();
-      }
-      words = sort(words);
-      allData += join(words, " ");
+    String allTxt = join(lines, " ");//Combines an array of Strings into one String, each separated by the character(s) used for the separator parameter
+    //data processing
+    String[] words = splitTokens(allTxt, "\t+\n<>=\\-!@#$%^&*(),.;:/?\"\'[]{}|0  123456789");  //delimiter list, pas enlever tous??? --> <>=\\-!@#$%^&*(),.;:/?\"\'[]{}|
+    for (int j = 0; j < words.length; j++) {
+      words[j] = words[j].trim();//Removes whitespace characters from the beginning and end of a String.
+      words[j] = words[j].toLowerCase();
     }
-    String[] words = split(allData, " ");
     words = sort(words);
-    allData = join(words, " ");
+    allData += join(words, " ");
+  }
+  String[] words = split(allData, " ");
+  words = sort(words);
+  allData = join(words, " ");
 
-    finished = true; // The thread is completed!
-    println("Finished loading");
+  finished = true; // The thread is completed!
+  println("Finished loading");
 }
 
 
@@ -259,15 +257,14 @@ void oscEvent(OscMessage theOscMessage) {
          */
         if (r + g + b < 383) {
           pxl[loc] = 1;
-        }
-        else if (r + g + b >= 383) {
+        } else if (r + g + b >= 383) {
           pxl[loc] = 0;
         }
       }
     }
 
 
-//translate Data in Ascii Numbers
+    //translate Data in Ascii Numbers
 
 
     int countChar = allData.length();
@@ -275,12 +272,12 @@ void oscEvent(OscMessage theOscMessage) {
     int[] charList = new int[countChar];
 
     for (int y = 0; y < countChar; y++) {
-        char lettre = allData.charAt(y);
-        int lnumber = int(lettre);
-        charList[y] = lettre;
-        }
-         
-    
+      char lettre = allData.charAt(y);
+      int lnumber = int(lettre);
+      charList[y] = lettre;
+    }
+
+
     int parts = countChar/2000;
     int startPxl1 = 0;
     int startPxl2 = parts-1;
@@ -304,67 +301,66 @@ void oscEvent(OscMessage theOscMessage) {
 
 
     ///////////////separate the Data
-    
-    
 
-//    //in the following different ways of creating osc messages are shown by example */
-//    int countPxl = pxl.length/6;
-//    int startPxl1 = 0;
-//    int startPxl2 = countPxl-1;
-//    int startPxl3 = (countPxl*2)-1;
-//    int startPxl4 = (countPxl*3)-1;
-//    int startPxl5 = (countPxl*4)-1;
-//    int startPxl6 = (countPxl*5)-1;
-//    int[] pxl1 = subset(pxl, startPxl1, countPxl);
-//    int[] pxl2 = subset(pxl, startPxl2, countPxl);
-//    int[] pxl3 = subset(pxl, startPxl3, countPxl);
-//    int[] pxl4 = subset(pxl, startPxl4, countPxl);
-//    int[] pxl5 = subset(pxl, startPxl5, countPxl);
-//    int[] pxl6 = subset(pxl, startPxl6, countPxl);
-//
-//    //Send all Data in 6 messages
-//
-//    OscMessage myMessage1 = new OscMessage("/chat");
-//    myMessage1.add(pxl1); /* add an int array to the osc message */
-//    println(myMessage1);
-//    //send the message
-//    oscP5.send(myMessage1, myRemoteLocation);
-//
-//    OscMessage myMessage2 = new OscMessage("/chat");
-//    myMessage2.add(pxl2); /* add an int array to the osc message */
-//    println(myMessage2);
-//    //send the message
-//    oscP5.send(myMessage2, myRemoteLocation);
-//
-//    OscMessage myMessage3 = new OscMessage("/chat");
-//    myMessage3.add(pxl3); /* add an int array to the osc message */
-//    println(myMessage2);
-//    //send the message
-//    oscP5.send(myMessage3, myRemoteLocation);
-//
-//
-//    OscMessage myMessage4 = new OscMessage("/chat");
-//    myMessage4.add(pxl4); /* add an int array to the osc message */
-//    println(myMessage2);
-//    //send the message
-//    oscP5.send(myMessage4, myRemoteLocation);
-//
-//    OscMessage myMessage5 = new OscMessage("/chat");
-//    myMessage5.add(pxl5); /* add an int array to the osc message */
-//    println(myMessage2);
-//    //send the message
-//    oscP5.send(myMessage5, myRemoteLocation);
-//
-//    OscMessage myMessage6 = new OscMessage("/chat");
-//    myMessage6.add(pxl6); /* add an int array to the osc message */
-//    println(myMessage2);
-//    //send the message
-//    oscP5.send(myMessage6, myRemoteLocation);
+
+
+    //    //in the following different ways of creating osc messages are shown by example */
+    //    int countPxl = pxl.length/6;
+    //    int startPxl1 = 0;
+    //    int startPxl2 = countPxl-1;
+    //    int startPxl3 = (countPxl*2)-1;
+    //    int startPxl4 = (countPxl*3)-1;
+    //    int startPxl5 = (countPxl*4)-1;
+    //    int startPxl6 = (countPxl*5)-1;
+    //    int[] pxl1 = subset(pxl, startPxl1, countPxl);
+    //    int[] pxl2 = subset(pxl, startPxl2, countPxl);
+    //    int[] pxl3 = subset(pxl, startPxl3, countPxl);
+    //    int[] pxl4 = subset(pxl, startPxl4, countPxl);
+    //    int[] pxl5 = subset(pxl, startPxl5, countPxl);
+    //    int[] pxl6 = subset(pxl, startPxl6, countPxl);
+    //
+    //    //Send all Data in 6 messages
+    //
+    //    OscMessage myMessage1 = new OscMessage("/chat");
+    //    myMessage1.add(pxl1); /* add an int array to the osc message */
+    //    println(myMessage1);
+    //    //send the message
+    //    oscP5.send(myMessage1, myRemoteLocation);
+    //
+    //    OscMessage myMessage2 = new OscMessage("/chat");
+    //    myMessage2.add(pxl2); /* add an int array to the osc message */
+    //    println(myMessage2);
+    //    //send the message
+    //    oscP5.send(myMessage2, myRemoteLocation);
+    //
+    //    OscMessage myMessage3 = new OscMessage("/chat");
+    //    myMessage3.add(pxl3); /* add an int array to the osc message */
+    //    println(myMessage2);
+    //    //send the message
+    //    oscP5.send(myMessage3, myRemoteLocation);
+    //
+    //
+    //    OscMessage myMessage4 = new OscMessage("/chat");
+    //    myMessage4.add(pxl4); /* add an int array to the osc message */
+    //    println(myMessage2);
+    //    //send the message
+    //    oscP5.send(myMessage4, myRemoteLocation);
+    //
+    //    OscMessage myMessage5 = new OscMessage("/chat");
+    //    myMessage5.add(pxl5); /* add an int array to the osc message */
+    //    println(myMessage2);
+    //    //send the message
+    //    oscP5.send(myMessage5, myRemoteLocation);
+    //
+    //    OscMessage myMessage6 = new OscMessage("/chat");
+    //    myMessage6.add(pxl6); /* add an int array to the osc message */
+    //    println(myMessage2);
+    //    //send the message
+    //    oscP5.send(myMessage6, myRemoteLocation);
 
     println(alpha);
     updatePixels();
-
-}
+  }
 
 
 
@@ -403,8 +399,6 @@ void oscEvent(OscMessage theOscMessage) {
     eraser = true;
     background(255);
   }
-  
-
 }
 
 
@@ -428,7 +422,7 @@ public String getIncrementalFilename(String what) {
     suffix=what.substring(last+1);
     // Comment out if you want to use absolute paths
     // or if you're not using this inside PApplet
-    if (sketchPath!=null) prefix=savePath(prefix);
+    //if (sketchPath != null) prefix=savePath(prefix);
     index=0;
     ok=false;
     do {
@@ -442,8 +436,7 @@ public String getIncrementalFilename(String what) {
       // Provide a panic button. If index > 10000 chances are it's an 
       // invalid filename.
       if (index>10000) ok=true;
-    } 
-    while (!ok);
+    } while (!ok);
     // Panic button - comment out if you know what you're doing
     if (index>10000) {
       return prefix+"ERR"+suffix;
@@ -464,8 +457,7 @@ class Intervalometre {
     if (millis() > dernier_tic + intervalle) {
       dernier_tic = millis();
       return true;
-    } 
-    else {
+    } else {
       return false;
     }
   }
