@@ -113,52 +113,52 @@ q.pxlBuffer = q.pxlBuffer ++ msg;
 //////////////////////////////////////////
 //Serial Communication for Arduino
 
-q.arduino = "Arduino";
+//q.arduino = "Arduino";
 
-// (
-// q.arduino = ArduinoSMS(
-// 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
-// 	baudrate: 115200,    //check that baudrate is the same as in arduino sketch
-// );
-// );
+ (
+ q.arduino = ArduinoSMS(
+ 	"/dev/ttyUSB0",    //edit to match your port. SerialPort.listDevices
+ 	baudrate: 115200,    //check that baudrate is the same as in arduino sketch
+ );
+);
 
 
-// /////////////////
-// //Event Setup for Aruino
-//
-// ///mapping
-// q.mapping = (
-// 	rls: [$d, 2],
-// 	srv: [$s, 3],
-// 	led: [$a, 5],
-// 	stp: [$t, 8]
-// );
-//
-// ///EventType
-// q.motorOffset = 0;
-// q.p5Offset = -10;
-//
-// (
-// Event.addEventType(\mechan, {
-// 	var adst = ~adst ? $d;
-// 	var pin = ~pin ? 2;
-// 	var val = ~val ? 0;
-// 	var val1 = ~val1, val2 = ~val2, val3 = ~val3;
-// 	if(pin.isNumber.not) {			// map symbols across dictionary
-// 		pin = q.mapping.at(pin);
-// 		adst = pin[0];
-// 		pin = pin[1];
-// 	};
-// 	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.motorOffset, {
-// 	q.arduino.send($w, adst, pin, val);
-// 	//});
-// 	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.p5Offset, {
-// 	q.oscTX(val1, val2, val3);
-// 	//"val1, val2, val3".postln;
-// 	//});
-//
-// });
-// );
+/////////////////
+//Event Setup for Aruino
+
+///mapping
+q.mapping = (
+	rls: [$d, 2],
+	srv: [$s, 3],
+	led: [$a, 5],
+	stp: [$t, 8]
+);
+
+///EventType
+q.motorOffset = 0;
+q.p5Offset = -10;
+
+(
+Event.addEventType(\mechan, {
+	var adst = ~adst ? $d;
+	var pin = ~pin ? 2;
+	var val = ~val ? 0;
+	var val1 = ~val1, val2 = ~val2, val3 = ~val3;
+	if(pin.isNumber.not) {			// map symbols across dictionary
+		pin = q.mapping.at(pin);
+		adst = pin[0];
+		pin = pin[1];
+	};
+	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.motorOffset, {
+	q.arduino.send($w, adst, pin, val);
+	//});
+	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.p5Offset, {
+	q.oscTX(val1, val2, val3);
+	//"val1, val2, val3".postln;
+	//});
+
+});
+);
 
 
 
@@ -369,7 +369,7 @@ Ndef(\delay, {
 //____________________________________________________________________________________________________________________________________
 //////////////////
 ///////PATTERNS SETUP
-/*
+
 
 Tdef(\printPxl, {
 loop{
@@ -452,7 +452,7 @@ rrand(0.01, 0.2).wait;
 
 //Tdef(\printRand).play;
 //Tdef(\printRand).stop;
-*/
+
 
 //____________________________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -477,6 +477,7 @@ Tdef(\boucle, {
 		//Produce Data;
 		//random density
 		q.oscTX([2, 3, 4].choose);
+		q.oscTX(2);
 		2.5.wait;
 
 		//send me some pxlData
@@ -513,8 +514,7 @@ Tdef(\boucle, {
 		//1_Print
 		"1_mechaLoop".postln;
 		Tdef(\printPxl).play;
-
-		//rrand(28, 107).wait;
+		rrand(28, 107).wait;
 		Tdef(\printPxl).stop;
 
 		//Crackling

@@ -477,6 +477,7 @@ Tdef(\boucle, {
 		//Produce Data;
 		//random density
 		q.oscTX([2, 3, 4].choose);
+		q.oscTX(2);
 		2.5.wait;
 
 		//send me some pxlData
