@@ -17,3 +17,21 @@ with carnivore
 sudo processing
 sudo jackd -P75 -dalsa -dhw:0 -p1024 -n3 -s -r44100 &
 sudo sclang /home/pi/Desktop/main_alpha_2_02/main_alpha_2_02.scd
+
+
+
+////////////////
+//backup card
+
+backup card
+sudo dd if=/dev/mmcblk0 of=bbbDejaBackup150616.img bs=4M status=progress
+
+write backup to card
+sudo dd if=bbbDejaBackup150616.img of=/dev/mmcblk0 bs=4M status=progress
+
+
+//
+//copy image
+
+sudo -s
+xz -cd debian-wheezy-7.2-armhf-3.8.13-bone30.img.xz > /dev/sdX

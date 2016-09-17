@@ -118,7 +118,7 @@ q.pxlBuffer = q.pxlBuffer ++ msg;
 
  (
  q.arduino = ArduinoSMS(
- 	"/dev/ttyUSB0",    //edit to match your port. SerialPort.listDevices
+ 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
  	baudrate: 115200,    //check that baudrate is the same as in arduino sketch
  );
 );
