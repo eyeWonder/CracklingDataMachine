@@ -1,0 +1,5 @@
+sudo processing-java --sketch=/home/pi/Desktop/main_2_03 --output=/home/pi/Desktop/p5output --force --run
+sudo /home/pi/bin/Playback_to_Lineout.sh
+sudo /home/pi/bin/Record_from_lineIn_Micbias.sh
+sudo jackd -P75 -dalsa -dhw:1,0 -p2048 -n8 -s -r44100
+sudo sclang /home/pi/Desktop/main_2_03/main_2_03_arduino.scd

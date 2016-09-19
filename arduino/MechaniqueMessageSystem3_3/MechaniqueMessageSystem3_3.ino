@@ -20,22 +20,14 @@
 #define STEPS 48
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_MS_PWMServoDriver.h"
 
-Adafruit_MotorShield AFMStop = Adafruit_MotorShield(0x61); 
-Adafruit_MotorShield AFMSbot = Adafruit_MotorShield(0x60);  
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);  
 
-// Select which 'port' M1, M2, M3 or M4. In this case, M1
-Adafruit_DCMotor *myMotor1 = AFMStop.getMotor(2);
-// You can also make another motor on port M2
-//Adafruit_DCMotor *myOtherMotor = AFMS.getMotor(2);
+Adafruit_StepperMotor *myMotor1 = AFMS.getStepper(48, 1);
 
-// Connect a stepper motor with 200 steps per revolution (1.8 degree)
-// to motor port #2 (M3 and M4)
-Adafruit_StepperMotor *myMotor2 = AFMStop.getStepper(48, 2);
+Adafruit_StepperMotor *myMotor2 = AFMS.getStepper(48, 2);
 
-Adafruit_StepperMotor *myMotor3 = AFMSbot.getStepper(48, 1);
-
-Adafruit_StepperMotor *myMotor4 = AFMSbot.getStepper(48, 2);
 
 int solenoid = 5;
 
@@ -214,17 +206,6 @@ void writepin() { // Write pin
     //myMotor2->step(2, FORWARD, DOUBLE); 
     myMotor3->step(3, BACKWARD, DOUBLE);
     myMotor3->release(); 
-    break;
-
-  case 'p' :
-
-    pin = messageGetInt();  // Gets the next word as an integer
-    state = messageGetInt();
-    myMotor4->setSpeed(state); 
-    //myMotor2->step(2, FORWARD, DOUBLE); 
-    myMotor4->step(3, BACKWARD, DOUBLE);
-    myMotor4->release(); 
-
 
 
   }

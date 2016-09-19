@@ -1,5 +1,7 @@
 _startup
 
+sudo /home/pi/bin/Playback_to_Lineout.sh -q
+sudo /home/pi/bin/Record_from_lineIn_Micbias.sh -q
 sudo processing
 jackd -P75 -dalsa -dhw:0 -p1024 -n3 -s -r44100 &
 sclang /home/pi/Desktop/main_alpha_2_02/main_alpha_2_02.scd
@@ -17,6 +19,13 @@ with carnivore
 sudo processing
 sudo jackd -P75 -dalsa -dhw:0 -p1024 -n3 -s -r44100 &
 sudo sclang /home/pi/Desktop/main_alpha_2_02/main_alpha_2_02.scd
+
+
+//How to fix Perl warning setting locale failed on Raspbian
+
+sudo raspi-config
+set en_US.UTF-8
+Default Locale en_US.UTF-8 (not none)
 
 
 
