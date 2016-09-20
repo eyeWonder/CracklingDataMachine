@@ -1,5 +1,17 @@
-sudo processing-java --sketch=/home/pi/Desktop/main_2_03 --output=/home/pi/Desktop/p5output --force --run
-sudo /home/pi/bin/Playback_to_Lineout.sh
-sudo /home/pi/bin/Record_from_lineIn_Micbias.sh
+sudo processing-java --sketch=/home/pi/Desktop/cdm_2_2_2 --output=/home/pi/Desktop/p5output --force --run
+sudo /home/pi/bin/Playback_to_Lineout.sh -d
+sudo /home/pi/bin/Record_from_lineIn_Micbias.sh -d
 sudo jackd -P75 -dalsa -dhw:1,0 -p2048 -n8 -s -r44100
 sudo sclang /home/pi/Desktop/main_2_03/main_2_03_arduino.scd
+
+
+headless!!!
+
+sudo Xvfb :1 -screen 0 1024x768x24
+export DISPLAY=":1"
+sudo processing-java --sketch=/home/pi/Desktop/cdm_2_2_2 --output=/home/pi/Desktop/p5output --force --run
+sudo /home/pi/bin/Playback_to_Lineout.sh -d
+sudo /home/pi/bin/Record_from_lineIn_Micbias.sh -d
+jackd -P75 -dalsa -dhw:0 -p2048 -n8 -s -r44100
+export DISPLAY=:0.0
+sclang /home/pi/Desktop/cdm_2_2_2/main_2_04_arduino.scd

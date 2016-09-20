@@ -36,46 +36,46 @@ void setup() {
 
 void loop() {
   Serial.println("Single coil steps");
-  myMotor->step(100, FORWARD, SINGLE);
+  myMotor->step(200, FORWARD, SINGLE);
   myMotor->release();
-  myMotor2->step(100, FORWARD, SINGLE);
+  myMotor2->step(200, FORWARD, SINGLE);
   myMotor2->release();
-  myMotor->step(100, BACKWARD, SINGLE);
+  myMotor->step(200, BACKWARD, SINGLE);
   myMotor->release();
-  myMotor2->step(100, BACKWARD, SINGLE);
+  myMotor2->step(200, BACKWARD, SINGLE);
   myMotor2->release();
-  delay(500);
+  delay(1000);
 
   Serial.println("Double coil steps");
-  myMotor->step(100, FORWARD, DOUBLE);
+  myMotor->step(200, FORWARD, DOUBLE);
   myMotor->release();
-  myMotor2->step(100, FORWARD, DOUBLE);
+  myMotor2->step(200, FORWARD, DOUBLE);
   myMotor2->release();
-  myMotor->step(100, BACKWARD, DOUBLE);
+  myMotor->step(200, BACKWARD, DOUBLE);
   myMotor->release();
-  myMotor2->step(100, BACKWARD, DOUBLE);
+  myMotor2->step(200, BACKWARD, DOUBLE);
   myMotor2->release();
-  delay(500);
+  delay(1000);
 
   Serial.println("Interleave coil steps");
-  myMotor->step(100, FORWARD, INTERLEAVE);
+  myMotor->step(200, FORWARD, INTERLEAVE);
   myMotor->release();
-  myMotor2->step(100, FORWARD, INTERLEAVE);
+  myMotor2->step(200, FORWARD, INTERLEAVE);
   myMotor2->release();
-  myMotor->step(100, BACKWARD, INTERLEAVE);
+  myMotor->step(200, BACKWARD, INTERLEAVE);
   myMotor->release();
-  myMotor2->step(100, BACKWARD, INTERLEAVE);
+  myMotor2->step(200, BACKWARD, INTERLEAVE);
   myMotor2->release();
-  delay(500);
+  delay(1000);
 
   Serial.println("Microstep steps");
-  myMotor->step(50, FORWARD, MICROSTEP);
+  myMotor->step(100, FORWARD, MICROSTEP);
   myMotor->release();
-  myMotor2->step(50, FORWARD, MICROSTEP);
+  myMotor2->step(100, FORWARD, MICROSTEP);
   myMotor2->release();
-  myMotor->step(50, BACKWARD, MICROSTEP);
+  myMotor->step(100, BACKWARD, MICROSTEP);
   myMotor->release();
-  myMotor2->step(50, BACKWARD, MICROSTEP);
+  myMotor2->step(100, BACKWARD, MICROSTEP);
   myMotor2->release();
-  delay(500);
+  delay(1000);
 }
