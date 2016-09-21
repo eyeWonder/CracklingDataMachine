@@ -5,6 +5,152 @@
 //2016, Ali Tnani & Lukas Truniger
 //////////////////////////
 
+//Serial Tests
+
+q = ();
+
+(
+ q.arduino = ArduinoSMS(
+ 	"/dev/ttyACM2",    //edit to match your port. SerialPort.listDevices
+ 	baudrate: 38400    //check that baudrate is the same as in arduino sketch
+ );
+);
+
+//q.arduino.close;
+
+
+q.arduino.send($w, $o); //solenoid
+q.arduino.send($w, $s,1, 1); //stepper x (speed, steps)
+q.arduino.send($w, $t, 1, 1); //stepper y (speed, steps)
+
+q.arduino.send($w, $s, 1, 1); //stepper x (speed, steps)
+q.arduino.send($w, $t, 6, 1); //stepper y (speed, steps)
+
+
+(
+Tdef(\tester, {
+350.do{
+	q.arduino.send($w, $s, 1, 0);
+	0.15.wait;
+	q.arduino.send($w, $o);
+	0.15.wait;
+};
+}).play;
+)
+
+
+(
+Tdef(\tester, {
+	var direct = 1;
+350.do{|y|
+	350.do{|x|
+		q.arduino.send($w, $s, 1, direct);
+		0.1.wait;
+			if(0.5.coin==true,  {q.arduino.send($w, $o);});
+			//q.arduino.send($w, $o);
+		0.1.wait;
+		};
+		q.arduino.send($w, $t, 6, 1);
+		0.1.wait;
+		direct = 1-direct;
+	};
+}).play;
+)
+
+Tdef(\tester).stop;
+
+
+//_______________________________
+// WINDOW Example:
+// First create a window and draw inside of it
+(
+    w = Window.new;
+    w.front; // comment this to copy offscreen window
+    w.view.background_(Color.white);
+    w.drawHook = {
+        Pen.translate(100, 100);
+        10.do{
+            // set the Color
+            Pen.color = Color.blue(rrand(0.0, 1), rrand(0.0, 0.5));
+            Pen.addWedge((100.rand)@(100.rand), rrand(10, 100), 2pi.rand, 2pi.rand);
+            Pen.perform([\stroke, \fill].choose);
+        }
+    };
+    w.refresh;
+)
+
+
+// then grab the window
+(
+    i = Image.fromWindow(w);
+    w.close;
+    i.plot(freeOnClose:true);
+)
+
+// VIEW Capture Example:
+// First create a window and add some views inside of it
+(
+    w = Window.new.front;
+    b = [10, 80].asSpec;
+    c = NumberBox(w, Rect(20, 20, 60, 40));
+    a = Slider(w, Rect(20, 80, 100, 40))
+        .focusColor_(Color.red(alpha:0.2))
+        .action_({
+            c.value_(b.map(a.value).round(0.01))
+    // round the float so it will fit in the NumberBox
+            });
+)
+
+// then grab the window
+(
+    i = Image.fromWindow(w, a.bounds);
+    w.close;
+    i.plot(freeOnClose:true);
+)
+
+
+
+// A simple example on how to manipulate pixels with Image
+b = Int32Array[
+    Integer.fromRGBA(255,0,0,255), // red
+    Integer.fromRGBA(0,255,0,255), // green
+    Integer.fromRGBA(0,0,255,255), // blue
+    Integer.fromRGBA(255,0,255,255) // purple
+];
+
+b[0].red; // 255 see Integer.red
+b[0].green; // 0 see Integer.green
+b[0].blue; // 0 see Integer.blue
+b[0].alpha; // 255 see Integer.alpha
+
+a = Image.new(b.size@1).pixels_(b).interpolation_(\none);
+a.plot;
+
+
+// Set + Get
+a.setPixel([255, 0, 255, 128].asRGBA /* create an Integer from 0-255 integer rgba value */, 0, 0).plot;
+p = a.getPixel(0,0);
+
+p.red; // 255
+p.green; // 0
+p.blue; // 255
+p.alpha; // 128
+
+// now another important example
+a.setPixel([255, 0, 255, 0].asRGBA, 1, 0).plot; // clear color -> alpha is 0
+p = a.getPixel(1,0);
+
+p.red; // you expect 255 but you get 0 ??? Why = because Image uses premultiplied color component value internally
+// meaning all Red, Green, and Blue component are premultiplied by the alpha
+// if alpha is 0 you get 0 back for all components.
+
+p.green; // 0
+p.blue; // 0
+p.alpha; // 0
+
+p = a.getColor(1,0); // more explicit - but same here
+
+
 
 (
 //____________________________________________________________________________________________________________________________________
@@ -119,7 +265,7 @@ q.pxlBuffer = q.pxlBuffer ++ msg;
  (
  q.arduino = ArduinoSMS(
  	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
- 	baudrate: 115200,    //check that baudrate is the same as in arduino sketch
+ 	baudrate: 115200    //check that baudrate is the same as in arduino sketch
  );
 );
 
@@ -555,4 +701,3 @@ Tdef(\boucle, {
 });
 
 );
-

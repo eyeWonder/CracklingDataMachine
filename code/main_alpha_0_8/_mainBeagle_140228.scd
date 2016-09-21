@@ -391,11 +391,11 @@ Tdef(\printPxl, {
 		q.currentLine.postln;
 		q.counter = 0;
 		0.4.wait;
-		q.arduino.send($w, $c, 1, 550); //DC get Back
+		q.arduino.send($w, $s, 1, 550); //DC get Back
 		1.5.wait;
 		//q.arduino.send($w, $d, 1, 400); //DC to starting Point, Hardware starting Point?
 		//1.wait;
-		q.arduino.send($w, $s, 10, 7); //Stepper next Line
+		q.arduino.send($w, $t, 10, 7); //Stepper next Line
 		1.5.wait;
 		//q.arduino.send($w, $o);
 		//0.1.wait;

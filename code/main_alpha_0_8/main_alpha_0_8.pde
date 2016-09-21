@@ -41,7 +41,7 @@ String name;
 int[] pxl;
 
 void setup() {
-  size(width, height);
+  size(595, 842);
   frameRate(24);
   oscP5 = new OscP5(this, 12000);
   myRemoteLocation = new NetAddress("127.0.0.1", 57120);
@@ -225,7 +225,7 @@ public String getIncrementalFilename(String what) {
     suffix=what.substring(last+1);
     // Comment out if you want to use absolute paths
     // or if you're not using this inside PApplet
-    if (sketchPath!=null) prefix=savePath(prefix);
+    //if (sketchPath!=null) prefix=savePath(prefix);
     index=0;
     ok=false;
     do {
@@ -267,4 +267,3 @@ class Intervalometre {
     }
   }
 }
-
