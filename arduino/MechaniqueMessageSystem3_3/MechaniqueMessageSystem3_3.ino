@@ -144,7 +144,7 @@ void writepin() { // Write pin
       state = messageGetInt();
       //myMotor2->setSpeed(pin);
       //myMotor2->step(2, FORWARD, DOUBLE);
-      myMotor2->step(pin, state, SINGLE);
+      myMotor2->step(pin, state, DOUBLE);
       delay(10);
       myMotor2->release();
 

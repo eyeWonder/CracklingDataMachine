@@ -30,10 +30,10 @@ q.arduino.send($w, $t, 6, 1); //stepper y (speed, steps)
 (
 Tdef(\tester, {
 350.do{
-	q.arduino.send($w, $s, 1, 0);
-	0.15.wait;
+	q.arduino.send($w, $s, 1, 1);
+	0.1.wait;
 	q.arduino.send($w, $o);
-	0.15.wait;
+	0.1.wait;
 };
 }).play;
 )
@@ -41,7 +41,7 @@ Tdef(\tester, {
 
 (
 Tdef(\tester, {
-	var direct = 1;
+	var direct = 0;
 350.do{|y|
 	350.do{|x|
 		q.arduino.send($w, $s, 1, direct);
@@ -69,16 +69,15 @@ var red, green, blue, alpha;
 i = Image.new(350,350);
 f = Font("Arial", 18);
 i.draw({ |ii|
-	359.do {
-		350.do{
-			Pen.stringAtPoint("A".asString, Point(rrand(0, 400), rrand(0, 300)), f, Color.black);
+	35.do{
+		35.do{
+			Pen.stringAtPoint("A".asString, Point(rrand(0, 350), rrand(0, 350)), f, Color.black);
 		};
 	};
 	Pen.fill;
-    }); //.plot(freeOnClose:true); //background:Color.white);
+    }).plot(freeOnClose:true); //background:Color.white);
 p = i.pixels;
-i.loadPixels(p);
-i.free;
+//i.free;
 p.postln;
 p.size.postln;
 
@@ -91,9 +90,41 @@ blue = p[3000] >> 8 & 0xFF;
 blue.postln;
 alpha = p[3000] & 0xFF;
 alpha.postln;
+
+p[122499].postln;
+red = p[122499] >> 24 & 0xFF;
+red.postln;
+green = p[122499] >> 16 & 0xFF;
+green.postln;
+blue = p[122499] >> 8 & 0xFF;
+blue.postln;
+alpha = p[122499] & 0xFF;
+alpha.postln;
+
 )
 
+350*350
+p[122171]
 
+p = Int32Array.fill(350*350, {|i| 3.rand });
+
+(
+var red, point;
+w = Window.new("tester", Rect(50, 50, 350, 350)).front;
+w.view.background_(Color.white);
+w.drawFunc = {
+	Pen.color = Color.black;
+	350.do{ |y|
+		350.do{ |x|
+			point = (x+1)*(y+1);
+			red = p[point-1] >> 24 & 0xFF;
+			if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1
+		};
+	};
+	Pen.stroke;
+};
+w.refresh;
+)
 
 (
 //____________________________________________________________________________________________________________________________________
