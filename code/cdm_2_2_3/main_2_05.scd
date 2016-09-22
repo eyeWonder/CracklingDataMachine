@@ -60,95 +60,38 @@ Tdef(\tester, {
 Tdef(\tester).stop;
 
 
-//_______________________________
-// WINDOW Example:
-// First create a window and draw inside of it
+
+//pixels = array --> an Int32Array of size receiver.width * receiver.height containing all pixel values as 32bit Integer
+
+
 (
-    w = Window.new;
-    w.front; // comment this to copy offscreen window
-    w.view.background_(Color.white);
-    w.drawHook = {
-        Pen.translate(100, 100);
-        10.do{
-            // set the Color
-            Pen.color = Color.blue(rrand(0.0, 1), rrand(0.0, 0.5));
-            Pen.addWedge((100.rand)@(100.rand), rrand(10, 100), 2pi.rand, 2pi.rand);
-            Pen.perform([\stroke, \fill].choose);
-        }
-    };
-    w.refresh;
+var red, green, blue, alpha;
+i = Image.new(350,350);
+f = Font("Arial", 18);
+i.draw({ |ii|
+	359.do {
+		350.do{
+			Pen.stringAtPoint("A".asString, Point(rrand(0, 400), rrand(0, 300)), f, Color.black);
+		};
+	};
+	Pen.fill;
+    }); //.plot(freeOnClose:true); //background:Color.white);
+p = i.pixels;
+i.loadPixels(p);
+i.free;
+p.postln;
+p.size.postln;
+
+p[3000].postln;
+red = p[3000] >> 24 & 0xFF;
+red.postln;
+green = p[3000] >> 16 & 0xFF;
+green.postln;
+blue = p[3000] >> 8 & 0xFF;
+blue.postln;
+alpha = p[3000] & 0xFF;
+alpha.postln;
 )
-
-
-// then grab the window
-(
-    i = Image.fromWindow(w);
-    w.close;
-    i.plot(freeOnClose:true);
-)
-
-// VIEW Capture Example:
-// First create a window and add some views inside of it
-(
-    w = Window.new.front;
-    b = [10, 80].asSpec;
-    c = NumberBox(w, Rect(20, 20, 60, 40));
-    a = Slider(w, Rect(20, 80, 100, 40))
-        .focusColor_(Color.red(alpha:0.2))
-        .action_({
-            c.value_(b.map(a.value).round(0.01))
-    // round the float so it will fit in the NumberBox
-            });
-)
-
-// then grab the window
-(
-    i = Image.fromWindow(w, a.bounds);
-    w.close;
-    i.plot(freeOnClose:true);
-)
-
-
-
-// A simple example on how to manipulate pixels with Image
-b = Int32Array[
-    Integer.fromRGBA(255,0,0,255), // red
-    Integer.fromRGBA(0,255,0,255), // green
-    Integer.fromRGBA(0,0,255,255), // blue
-    Integer.fromRGBA(255,0,255,255) // purple
-];
-
-b[0].red; // 255 see Integer.red
-b[0].green; // 0 see Integer.green
-b[0].blue; // 0 see Integer.blue
-b[0].alpha; // 255 see Integer.alpha
-
-a = Image.new(b.size@1).pixels_(b).interpolation_(\none);
-a.plot;
-
-
-// Set + Get
-a.setPixel([255, 0, 255, 128].asRGBA /* create an Integer from 0-255 integer rgba value */, 0, 0).plot;
-p = a.getPixel(0,0);
-
-p.red; // 255
-p.green; // 0
-p.blue; // 255
-p.alpha; // 128
-
-// now another important example
-a.setPixel([255, 0, 255, 0].asRGBA, 1, 0).plot; // clear color -> alpha is 0
-p = a.getPixel(1,0);
-
-p.red; // you expect 255 but you get 0 ??? Why = because Image uses premultiplied color component value internally
-// meaning all Red, Green, and Blue component are premultiplied by the alpha
-// if alpha is 0 you get 0 back for all components.
-
-p.green; // 0
-p.blue; // 0
-p.alpha; // 0
-
-p = a.getColor(1,0); // more explicit - but same here
 
 
 
