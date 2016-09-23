@@ -11,7 +11,7 @@ q = ();
 
 (
  q.arduino = ArduinoSMS(
- 	"/dev/ttyACM2",    //edit to match your port. SerialPort.listDevices
+ 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
  	baudrate: 38400    //check that baudrate is the same as in arduino sketch
  );
 );
@@ -24,13 +24,13 @@ q.arduino.send($w, $s,1, 1); //stepper x (speed, steps)
 q.arduino.send($w, $t, 1, 1); //stepper y (speed, steps)
 
 q.arduino.send($w, $s, 1, 1); //stepper x (speed, steps)
-q.arduino.send($w, $t, 6, 1); //stepper y (speed, steps)
+q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps)
 
 
 (
 Tdef(\tester, {
 350.do{
-	q.arduino.send($w, $s, 1, 1);
+	q.arduino.send($w, $s, 1, 0);
 	0.1.wait;
 	q.arduino.send($w, $o);
 	0.1.wait;
@@ -45,10 +45,10 @@ Tdef(\tester, {
 350.do{|y|
 	350.do{|x|
 		q.arduino.send($w, $s, 1, direct);
-		0.1.wait;
+		0.05.wait;
 			if(0.5.coin==true,  {q.arduino.send($w, $o);});
 			//q.arduino.send($w, $o);
-		0.1.wait;
+		0.05.wait;
 		};
 		q.arduino.send($w, $t, 6, 1);
 		0.1.wait;
@@ -58,6 +58,7 @@ Tdef(\tester, {
 )
 
 Tdef(\tester).stop;
+
 
 
 
@@ -104,11 +105,13 @@ alpha.postln;
 )
 
 350*350
-p[122171]
+p[122149]
 
 p = Int32Array.fill(350*350, {|i| 3.rand });
+p.plot;
 
 (
+//visual tester (not working at the moment)
 var red, point;
 w = Window.new("tester", Rect(50, 50, 350, 350)).front;
 w.view.background_(Color.white);
@@ -116,15 +119,52 @@ w.drawFunc = {
 	Pen.color = Color.black;
 	350.do{ |y|
 		350.do{ |x|
-			point = (x+1)*(y+1);
-			red = p[point-1] >> 24 & 0xFF;
-			if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1
+			point = ((x+1)*(y+1))-1;
+			red = p[point] >> 24 & 0xFF;
+			if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1, red >= 128
 		};
 	};
 	Pen.stroke;
 };
 w.refresh;
 )
+
+
+(
+Tdef(\tester, {
+	var direct = 0, line = Int32Array.new(350), point, red;
+	350.do{ |y|
+
+		line = Int32Array.new(350);
+		350.do{ |i|
+			line.add(p.pop);
+		};
+
+		350.do{ |x|
+
+			q.arduino.send($w, $s, 1, direct);
+			0.05.wait;
+			if(direct == 0, { point = line[x]; },
+				{ point = line.pop; });
+			red = point >> 24 & 0xFF;
+			if(red >= 64, {
+				q.arduino.send($w, $o);
+				0.05.wait;
+			});
+		};
+
+		q.arduino.send($w, $t, 7, 1);
+		0.1.wait;
+		direct = 1-direct;
+	};
+}).play;
+)
+
+--> spiegelverkehrt.
+-->data from p5
+-->anordnung
+
+
 
 (
 //____________________________________________________________________________________________________________________________________

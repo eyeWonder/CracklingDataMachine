@@ -118,7 +118,7 @@ void writepin() { // Write pin
       pin = messageGetInt();  // Gets the next word as an integer
       state = messageGetInt();
       digitalWrite(solenoid, HIGH);
-      delay(15);
+      delay(10);
       digitalWrite(solenoid, LOW);
 
       break;
