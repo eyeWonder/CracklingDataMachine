@@ -1,22 +1,11 @@
 /*
- Autor : ALI TNANI
- Title : Data Trails
+ Title : Crackling Data Machine
+ Autors : ALI TNANI & Lukas Truniger
  Date : 2014-2016
- Medium : Generative video, screen, computer 
- Dimensions : 1920 x 1080 pixels
- Ed. 1/3
- The Processing source code : v.2 - 26/09/2016. Build with Processing 3 (https://processingfoundation.org/).
+ Medium : steel, single board computers, printer, sound, paper and custom software 
+ Dimensions: 85 x 100 x 66 cm
  */
-/**
- Java SE API Documentation
- https://docs.oracle.com/javase/8/docs/api/
- Class InputStreamReader
- Class File
- Class Scanner
- Class Collections
- Class HashSet<E>
- Interface Set<E>
- */
+
 import java.util.*;
 /**
 https://docs.oracle.com/javase/7/docs/api/java/io/package-summary.html
@@ -178,7 +167,7 @@ public void setup() {
   System.out.println("You Are Connected to the Internet");
 
   /*defines currentAmount : int average[100;1000]*/
-  dataX = new Data(50, theSource);
+  dataX = new Data(100, theSource);
   dataY = new Data(1000, theSource);
 
   //create a new osc properties object

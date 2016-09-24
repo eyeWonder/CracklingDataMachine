@@ -2,10 +2,17 @@
 ////////////////////////////////
 ///Crackling Data Machines
 //////////////////////////////
-//2016, Ali Tnani & Lukas Truniger
+//2014-2016, Ali Tnani & Lukas Truniger
 //////////////////////////
 
-//Serial Tests
+/*
+///////////////////
+TODO!!!!!!!!!!!!
+--> character randomizer
+*/
+
+
+
 
 q = ();
 
@@ -21,60 +28,34 @@ q.arduino.send($w, $o); //solenoid
 q.arduino.send($w, $s,1, 1); //stepper x (speed, steps)
 q.arduino.send($w, $t, 1, 1); //stepper y (speed, steps)
 q.arduino.send($w, $s, 1, 1); //stepper x (speed, steps)
-q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps)
-
-
-(
-Tdef(\tester, {
-	350.do{
-		q.arduino.send($w, $s, 1, 0);
-		0.1.wait;
-		q.arduino.send($w, $o);
-		0.1.wait;
-	};
-}).play;
-)
-
-(
-Tdef(\tester, {
-	var direct = 0;
-	350.do{|y|
-		350.do{|x|
-			q.arduino.send($w, $s, 1, direct);
-			0.05.wait;
-			if(0.5.coin==true,  {q.arduino.send($w, $o);});
-			//q.arduino.send($w, $o);
-			0.05.wait;
-		};
-		q.arduino.send($w, $t, 6, 1);
-		0.1.wait;
-		direct = 1-direct;
-	};
-}).play;
-)
-
-Tdef(\tester).stop;
-
+q.arduino.send($w, $t, 6, 1); //stepper y (speed, steps)
 
 
 /////////////////////////////////////////
-//pixels = array --> an Int32Array of size receiver.width * receiver.height containing all pixel values as 32bit Integer
+//get letters from p5 and place it in meaningful manners
+
+q.wordBuffer = q.charBuffer.asAscii.asString.split($ );
+//removeItems (items: ",().?/!?;:_")
+
 (
-var red, green, blue, alpha;
-i = Image.new(350,350);
-f = Font("Arial", 18);
-i.draw({ |ii|
-	35.do{
-		35.do{
-			Pen.stringAtPoint("A".asString, Point(rrand(0, 350), rrand(0, 350)), f, Color.black);
-		};
+var red, green, blue, alpha, font, xpos = 0, ypos = 0, word;
+q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
+q.image.draw({
+	var xrand = rrand(0.2, 1.9);
+	var yrand = rrand(0.8, 2.1);
+	q.wordBuffer.size.do{ |i|
+		xpos = xpos+(i*xrand);
+		ypos = ypos+yrand;
+		Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), font, Color.black);
+		if(xpos >= q.pxlRes[0], { xpos = 0 });
+		if(ypos >= q.pxlRes[1], { ypos = 0 });
 	};
 	Pen.fill;
-}).plot(freeOnClose:true); //background:Color.white);
-p = i.pixels;
+}).plot(freeOnClose:true, background:Color.white);
+//q.imagePixel = q.image.pixels;
 //i.free;
-p.postln;
-p.size.postln;
+//p.postln;
+//p.size.postln;
 
 p[3000].postln;
 red = p[3000] >> 24 & 0xFF;
@@ -85,48 +66,47 @@ blue = p[3000] >> 8 & 0xFF;
 blue.postln;
 alpha = p[3000] & 0xFF;
 alpha.postln;
-
-p[122499].postln;
-red = p[122499] >> 24 & 0xFF;
-red.postln;
-green = p[122499] >> 16 & 0xFF;
-green.postln;
-blue = p[122499] >> 8 & 0xFF;
-blue.postln;
-alpha = p[122499] & 0xFF;
-alpha.postln;
 )
 
-350*350
-p[122149]
-p = Int32Array.fill(350*350, {|i| 3.rand });
-p.plot;
 
+//appClock??
+var red, green, blue, alpha, font, xpos = 0, ypos = 0;
 
-////////////////////////////////
-//visual tester (not working at the moment)
-(
-var red, point;
-w = Window.new("tester", Rect(50, 50, 350, 350)).front;
-w.view.background_(Color.white);
-w.drawFunc = {
-	Pen.color = Color.black;
-	350.do{ |y|
-		350.do{ |x|
-			point = ((x+1)*(y+1))-1;
-			red = p[point] >> 24 & 0xFF;
-			if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1, red >= 128
+q.newImage = {
+	q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
+	q.image.draw({
+		var xpos = 0, ypos = 0;
+		var xrand = rrand(0.2, 1.9);
+		var yrand = rrand(0.8, 2.1);
+		q.wordBuffer.size.do{ |i|
+			xpos = xpos+(i*xrand);
+			ypos = ypos+yrand;
+			Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), q.font, Color.black);
+			if(xpos >= q.pxlRes[0], { xpos = 0 });
+			if(ypos >= q.pxlRes[1], { ypos = 0 });
 		};
-	};
-	Pen.stroke;
+		Pen.fill;
+	});
+	q.imagePixel = q.image.pixels;
+	q.image.free;
+	//q.imagePixel.postln;
+	q.imagePixel[5000].postln;
 };
-w.refresh;
-)
+
+
+
+
+Tdef(\imageTester, {
+	loop{
+	{q.newImage}.defer(0);
+	}
+}).play;
+
 
 ////////////////////////////////////
 //printTester
 (
-Tdef(\printtTster, {
+Tdef(\printTester, {
 	var direct = 0, line = Int32Array.new(350), point, red;
 	350.do{ |y|
 
@@ -138,32 +118,31 @@ Tdef(\printtTster, {
 		350.do{ |x|
 
 			q.arduino.send($w, $s, 1, direct);
-			0.05.wait;
-			if(direct == 0, { point = line[x]; },
-				{ point = line.pop; });
+			q.printSpeed.wait;
+			if(direct == 0, { point = line.pop; },
+				{ point = line[x]; });
 			red = point >> 24 & 0xFF;
-			if(red >= 64, {
+			if(red >= 96, {
 				q.arduino.send($w, $o);
-				0.05.wait;
+				q.printSpeed.wait;
 			});
 		};
 
-		q.arduino.send($w, $t, 7, 1);
-		0.1.wait;
+		q.arduino.send($w, $t, q.stepsPerLine, 1);
+		(q.printSpeed*2).wait;
 		direct = 1-direct;
 	};
 }).play;
 )
 
---> spiegelverkehrt.
--->data from p5
--->anordnung
+Tdef(\printTester).pause;
+Tdef(\printTester).resume;
 
 
 
-(
+//(
 
-//____________________________________________________________________________________________________________________________________
+//___________________________________________________________________________________________________
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////SETUP
 
@@ -171,6 +150,7 @@ q = ();   //set variable as dictionary
 
 /////////////////////////////
 //Boot audio server
+
 (
 Tdef(\setup, {
 	s.quit;
@@ -182,30 +162,37 @@ Tdef(\setup, {
 	s.options.blockSize = 512;
 	0.5.wait;
 	s.boot;
-	1.wait;
+	3.wait;
 	Tdef(\boucle).play;
 }).play;
 );
 
 
-//data & buffers
+//////////////////////////////////////////
+//Serial Communication for Arduino
+
 (
-q.pxlRes =  [200, 300];
-q.page = [];
-q.pxlBuffer = [60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62, 60, 62];
-q.pageCount = 0;
-q.pageParts = 6;
+	q.arduino = ArduinoSMS(
+		"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
+		baudrate: 115200    //check that baudrate is the same as in arduino sketch
+	);
 );
 
-//q.pxlBuffer.size
-//q.pxlBuffer.choose
+/////////////////////////////////
+//Global Variables and Buffers
 
+q.pxlRes =  [350, 350];
+q.charBuffer = [];
 
-//global variables
-q.nextLine; //next Event for the printing process
-q.counter = 0;
-q.rev = 1;
+//variables printin
+q.printSpeed = 0.04; //duration of each step, min 0.04
+q.stepsPerLine = 7;
+q.font = Font("Arial", 14);
+q.direct = 0;
+q.imagePixel;
+q.image;
 
+//variables sound
 q.freqsFilt = [60, 68, 60, 62, 60, 62, 60];
 q.space = 32;
 q.freq = 0;
@@ -229,53 +216,26 @@ m = NetAddr("127.0.0.1", 12000);  //define remote adress and port
 q.oscTX = { |q, val1 |
 	m.sendMsg("/sendMe", val1);
 };
-
 );
 
+//q.oscTX(1); !!wait!!
 
 ////////////////////////////////
 //OSC-Receive setup from Processing
-
-/*
-(
-n = NetAddr("127.0.0.1", nil);
-q.oscRX = OSCdef(\oscMSG, {|msg, time, addr, recvPort|
-msg.postln;
-msg.removeAt(0);
-q.page = q.page ++ msg;
-q.pageCount = q.pageCount + 1;
-if(q.pageCount == q.pageParts,
-{q.pxlBuffer = q.page ++ q.pxlBuffer;
-q.pageCount = 0;
-q.page = [];
-});
-}, '/chat', n);
-);
-*/
-
 
 (
 n = NetAddr("127.0.0.1", nil);
 q.oscRX = OSCdef(\oscMSG, {|msg, time, addr, recvPort|
 	msg.postln;
 	msg.removeAt(0);
-	q.pxlBuffer = q.pxlBuffer ++ msg;
+	msg.size.postln;
+	q.charBuffer = msg;
 }, '/chat', n);
 );
 
 
 
 
-//////////////////////////////////////////
-//Serial Communication for Arduino
-
-//q.arduino = "Arduino";
-(
-	q.arduino = ArduinoSMS(
-		"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
-		baudrate: 115200    //check that baudrate is the same as in arduino sketch
-	);
-);
 
 
 /////////////////
@@ -625,15 +585,6 @@ Tdef(\boucle, {
 		*/
 
 		"Data".postln;
-		//erease Pixel
-		q.oscTX(5);
-		0.3.wait;
-
-		//Produce Data;
-		//random density
-		q.oscTX([2, 3, 4].choose);
-		q.oscTX(2);
-		2.5.wait;
 
 		//send me some pxlData
 		q.oscTX(1);
@@ -709,3 +660,107 @@ Tdef(\boucle, {
 });
 
 );
+
+
+/*
+////////////////////////////////////////////////
+//Anexe
+
+//////////////////////////
+//Serial Tests
+(
+Tdef(\tester, {
+	350.do{
+		q.arduino.send($w, $s, 1, 0);
+		0.1.wait;
+		q.arduino.send($w, $o);
+		0.1.wait;
+	};
+}).play;
+)
+
+(
+Tdef(\tester, {
+	var direct = 0;
+	350.do{|y|
+		350.do{|x|
+			q.arduino.send($w, $s, 1, direct);
+			0.05.wait;
+			if(0.5.coin==true,  {q.arduino.send($w, $o);});
+			//q.arduino.send($w, $o);
+			0.05.wait;
+		};
+		q.arduino.send($w, $t, 6, 1);
+		0.1.wait;
+		direct = 1-direct;
+	};
+}).play;
+)
+
+Tdef(\tester).stop;
+
+
+/////////////////////////////////////////
+//pixels = array --> an Int32Array of size receiver.width * receiver.height containing all pixel values as 32bit Integer
+
+(
+var red, green, blue, alpha;
+i = Image.new(350,350);
+f = Font("Arial", 18);
+i.draw({ |ii|
+	35.do{
+		35.do{
+			Pen.stringAtPoint("A".asString, Point(rrand(0, 350), rrand(0, 350)), f, Color.black);
+		};
+	};
+	Pen.fill;
+}).plot(freeOnClose:true); //background:Color.white);
+p = i.pixels;
+//i.free;
+p.postln;
+p.size.postln;
+
+p[3000].postln;
+red = p[3000] >> 24 & 0xFF;
+red.postln;
+green = p[3000] >> 16 & 0xFF;
+green.postln;
+blue = p[3000] >> 8 & 0xFF;
+blue.postln;
+alpha = p[3000] & 0xFF;
+alpha.postln;
+)
+
+350*350
+p[122149]
+p = Int32Array.fill(350*350, {|i| 3.rand });
+p.plot;
+
+
+////////////////////////////////
+//visual tester (not working at the moment)
+(
+var red, point;
+w = Window.new("tester", Rect(50, 50, 350, 350)).front;
+w.view.background_(Color.white);
+w.drawFunc = {
+	Pen.color = Color.black;
+	350.do{ |y|
+		350.do{ |x|
+			point = ((x+1)*(y+1))-1;
+			red = p[point] >> 24 & 0xFF;
+			if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1, red >= 128
+		};
+	};
+	Pen.stroke;
+};
+w.refresh;
+)
+
+
+
+*/
+
+
+
+
