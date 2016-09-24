@@ -69,7 +69,7 @@ alpha.postln;
 )
 
 
-//appClock??
+//appClock!!
 var red, green, blue, alpha, font, xpos = 0, ypos = 0;
 
 q.newImage = {
@@ -98,7 +98,8 @@ q.newImage = {
 
 Tdef(\imageTester, {
 	loop{
-	{q.newImage}.defer(0);
+	{q.newImage}.defer;
+		5.wait;
 	}
 }).play;
 
@@ -146,7 +147,6 @@ Tdef(\printTester).resume;
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////SETUP
 
-q = ();   //set variable as dictionary
 
 /////////////////////////////
 //Boot audio server
@@ -167,6 +167,8 @@ Tdef(\setup, {
 }).play;
 );
 
+
+q = ();   //set variable as dictionary
 
 //////////////////////////////////////////
 //Serial Communication for Arduino

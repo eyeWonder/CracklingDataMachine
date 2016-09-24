@@ -167,7 +167,7 @@ public void setup() {
   System.out.println("You Are Connected to the Internet");
 
   /*defines currentAmount : int average[100;1000]*/
-  dataX = new Data(100, theSource);
+  dataX = new Data(500, theSource);
   dataY = new Data(1000, theSource);
 
   //create a new osc properties object
