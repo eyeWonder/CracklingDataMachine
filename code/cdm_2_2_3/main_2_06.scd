@@ -10,10 +10,10 @@
 q = ();
 
 (
- q.arduino = ArduinoSMS(
- 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
- 	baudrate: 38400    //check that baudrate is the same as in arduino sketch
- );
+q.arduino = ArduinoSMS(
+	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
+	baudrate: 38400    //check that baudrate is the same as in arduino sketch
+);
 );
 
 //q.arduino.close;
@@ -26,25 +26,25 @@ q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps)
 
 (
 Tdef(\tester, {
-350.do{
-	q.arduino.send($w, $s, 1, 0);
-	0.1.wait;
-	q.arduino.send($w, $o);
-	0.1.wait;
-};
+	350.do{
+		q.arduino.send($w, $s, 1, 0);
+		0.1.wait;
+		q.arduino.send($w, $o);
+		0.1.wait;
+	};
 }).play;
 )
 
 (
 Tdef(\tester, {
 	var direct = 0;
-350.do{|y|
-	350.do{|x|
-		q.arduino.send($w, $s, 1, direct);
-		0.05.wait;
+	350.do{|y|
+		350.do{|x|
+			q.arduino.send($w, $s, 1, direct);
+			0.05.wait;
 			if(0.5.coin==true,  {q.arduino.send($w, $o);});
 			//q.arduino.send($w, $o);
-		0.05.wait;
+			0.05.wait;
 		};
 		q.arduino.send($w, $t, 6, 1);
 		0.1.wait;
@@ -70,7 +70,7 @@ i.draw({ |ii|
 		};
 	};
 	Pen.fill;
-    }).plot(freeOnClose:true); //background:Color.white);
+}).plot(freeOnClose:true); //background:Color.white);
 p = i.pixels;
 //i.free;
 p.postln;
@@ -213,12 +213,12 @@ q.freq = 0;
 
 //PixelArrray for one line
 q.nextLine = { |q|
-q.currentLine = [];
-q.pxlRes[0].do{
-var pxl = q.pxlBuffer.pop;
-q.currentLine = q.currentLine ++ pxl;
-};
-\nextline;
+	q.currentLine = [];
+	q.pxlRes[0].do{
+		var pxl = q.pxlBuffer.pop;
+		q.currentLine = q.currentLine ++ pxl;
+	};
+	\nextline;
 };
 
 
@@ -240,15 +240,15 @@ q.oscTX = { |q, val1 |
 (
 n = NetAddr("127.0.0.1", nil);
 q.oscRX = OSCdef(\oscMSG, {|msg, time, addr, recvPort|
-	msg.postln;
-	msg.removeAt(0);
-	q.page = q.page ++ msg;
-	q.pageCount = q.pageCount + 1;
-	if(q.pageCount == q.pageParts,
-		{q.pxlBuffer = q.page ++ q.pxlBuffer;
-			q.pageCount = 0;
-			q.page = [];
-	});
+msg.postln;
+msg.removeAt(0);
+q.page = q.page ++ msg;
+q.pageCount = q.pageCount + 1;
+if(q.pageCount == q.pageParts,
+{q.pxlBuffer = q.page ++ q.pxlBuffer;
+q.pageCount = 0;
+q.page = [];
+});
 }, '/chat', n);
 );
 */
@@ -257,9 +257,9 @@ q.oscRX = OSCdef(\oscMSG, {|msg, time, addr, recvPort|
 (
 n = NetAddr("127.0.0.1", nil);
 q.oscRX = OSCdef(\oscMSG, {|msg, time, addr, recvPort|
-msg.postln;
-msg.removeAt(0);
-q.pxlBuffer = q.pxlBuffer ++ msg;
+	msg.postln;
+	msg.removeAt(0);
+	q.pxlBuffer = q.pxlBuffer ++ msg;
 }, '/chat', n);
 );
 
@@ -270,11 +270,11 @@ q.pxlBuffer = q.pxlBuffer ++ msg;
 //Serial Communication for Arduino
 
 //q.arduino = "Arduino";
- (
- q.arduino = ArduinoSMS(
- 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
- 	baudrate: 115200    //check that baudrate is the same as in arduino sketch
- );
+(
+	q.arduino = ArduinoSMS(
+		"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
+		baudrate: 115200    //check that baudrate is the same as in arduino sketch
+	);
 );
 
 
@@ -469,7 +469,7 @@ Tdef(\droneSin, {
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
 					Drand([-0.5, 0, 0.5, 1], inf)), 0.5, 2)
-				* EnvGen.kr(Env.perc(20, 20, 0.5), 0.6, 0.5, doneAction: 2), 0.1);
+			* EnvGen.kr(Env.perc(20, 20, 0.5), 0.6, 0.5, doneAction: 2), 0.1);
 		}).play;
 		8.wait;
 	}.tanh;
@@ -489,7 +489,7 @@ Tdef(\dronePulse, {
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
 					Drand([-0.5, 0, 0.5, 1], inf)), 0.5, 2)
-				* EnvGen.kr(Env.perc(20, 20, 0.5), 0.8, 0.3, doneAction: 2), 0.1);
+			* EnvGen.kr(Env.perc(20, 20, 0.5), 0.8, 0.3, doneAction: 2), 0.1);
 		}).play;
 		8.wait;
 	}.tanh;
@@ -527,37 +527,37 @@ Ndef(\delay, {
 
 
 Tdef(\printPxl, {
-loop{
-q.nextLine;
-0.4.wait;
-q.currentLine.postln;
-q.counter = 0;
-0.4.wait;
-q.arduino.send($w, $c, 1, 550); //DC get Back
-1.5.wait;
-//q.arduino.send($w, $d, 1, 400); //DC to starting Point, Hardware starting Point?
-//1.wait;
-q.arduino.send($w, $s, 10, 7); //Stepper next Line
-1.5.wait;
-//q.arduino.send($w, $o);
-//0.1.wait;
-q.pxlRes[0].do( //For each Line
-{
-var pxl = q.currentLine[q.counter];
-q.counter = q.counter + 1;
-if(pxl == 1, {
-q.arduino.send($w, $o);  //Pen up or down --> black or white
-});
-0.05.wait;
-q.arduino.send($w, $d, 1, 1.0);   				//DC next Pixel
-pxl.postln;
-0.05.wait;
+	loop{
+		q.nextLine;
+		0.4.wait;
+		q.currentLine.postln;
+		q.counter = 0;
+		0.4.wait;
+		q.arduino.send($w, $c, 1, 550); //DC get Back
+		1.5.wait;
+		//q.arduino.send($w, $d, 1, 400); //DC to starting Point, Hardware starting Point?
+		//1.wait;
+		q.arduino.send($w, $s, 10, 7); //Stepper next Line
+		1.5.wait;
+		//q.arduino.send($w, $o);
+		//0.1.wait;
+		q.pxlRes[0].do( //For each Line
+			{
+				var pxl = q.currentLine[q.counter];
+				q.counter = q.counter + 1;
+				if(pxl == 1, {
+					q.arduino.send($w, $o);  //Pen up or down --> black or white
+				});
+				0.05.wait;
+				q.arduino.send($w, $d, 1, 1.0);   				//DC next Pixel
+				pxl.postln;
+				0.05.wait;
 
-});
-0.1.wait;
-//q.arduino.send($w, $o);
-//0.1.wait;
-};
+		});
+		0.1.wait;
+		//q.arduino.send($w, $o);
+		//0.1.wait;
+	};
 
 });
 
@@ -570,37 +570,37 @@ pxl.postln;
 //RandomPrint
 
 Tdef(\printRand, {
-loop{
-q.nextLine;
-0.4.wait;
-q.currentLine.postln;
-q.counter = 0;
-0.4.wait;
-q.arduino.send($w, $c, 1, 550); //DC get Back
-rrand(1.5, 2.5).wait;
-//q.arduino.send($w, $d, 1, 400); //DC to starting Point, Hardware starting Point?
-//1.wait;
-q.arduino.send($w, $s, 10, 7); //Stepper next Line
-rrand(1.5, 2.5).wait;
-//q.arduino.send($w, $o);
-//0.1.wait;
-q.pxlRes[0].do( //For each Line
-{
-var pxl = q.currentLine[q.counter];
-q.counter = q.counter + 1;
-if(pxl == 1, {
-q.arduino.send($w, $o);  //Pen up or down --> black or white
-});
-rrand(0.01, 0.2).wait;
-q.arduino.send($w, $d, 1, 1.0);   				//DC next Pixel
-pxl.postln;
-rrand(0.01, 0.2).wait;
+	loop{
+		q.nextLine;
+		0.4.wait;
+		q.currentLine.postln;
+		q.counter = 0;
+		0.4.wait;
+		q.arduino.send($w, $c, 1, 550); //DC get Back
+		rrand(1.5, 2.5).wait;
+		//q.arduino.send($w, $d, 1, 400); //DC to starting Point, Hardware starting Point?
+		//1.wait;
+		q.arduino.send($w, $s, 10, 7); //Stepper next Line
+		rrand(1.5, 2.5).wait;
+		//q.arduino.send($w, $o);
+		//0.1.wait;
+		q.pxlRes[0].do( //For each Line
+			{
+				var pxl = q.currentLine[q.counter];
+				q.counter = q.counter + 1;
+				if(pxl == 1, {
+					q.arduino.send($w, $o);  //Pen up or down --> black or white
+				});
+				rrand(0.01, 0.2).wait;
+				q.arduino.send($w, $d, 1, 1.0);   				//DC next Pixel
+				pxl.postln;
+				rrand(0.01, 0.2).wait;
 
-});
-0.1.wait;
-//q.arduino.send($w, $o);
-//0.1.wait;
-};
+		});
+		0.1.wait;
+		//q.arduino.send($w, $o);
+		//0.1.wait;
+	};
 
 });
 

@@ -1,168 +1,11 @@
 ///////////////////////////
 ////////////////////////////////
 ///Crackling Data Machines
-//////////////////////////////
-//2016, Ali Tnani & Lukas Truniger
 //////////////////////////
-
-//Serial Tests
-
-q = ();
-
-(
- q.arduino = ArduinoSMS(
- 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
- 	baudrate: 38400    //check that baudrate is the same as in arduino sketch
- );
-);
-
-//q.arduino.close;
-q.arduino.send($w, $o); //solenoid
-q.arduino.send($w, $s,1, 1); //stepper x (speed, steps)
-q.arduino.send($w, $t, 1, 1); //stepper y (speed, steps)
-q.arduino.send($w, $s, 1, 1); //stepper x (speed, steps)
-q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps)
+//////beagleMain
 
 
 (
-Tdef(\tester, {
-350.do{
-	q.arduino.send($w, $s, 1, 0);
-	0.1.wait;
-	q.arduino.send($w, $o);
-	0.1.wait;
-};
-}).play;
-)
-
-(
-Tdef(\tester, {
-	var direct = 0;
-350.do{|y|
-	350.do{|x|
-		q.arduino.send($w, $s, 1, direct);
-		0.05.wait;
-			if(0.5.coin==true,  {q.arduino.send($w, $o);});
-			//q.arduino.send($w, $o);
-		0.05.wait;
-		};
-		q.arduino.send($w, $t, 6, 1);
-		0.1.wait;
-		direct = 1-direct;
-	};
-}).play;
-)
-
-Tdef(\tester).stop;
-
-
-
-/////////////////////////////////////////
-//pixels = array --> an Int32Array of size receiver.width * receiver.height containing all pixel values as 32bit Integer
-(
-var red, green, blue, alpha;
-i = Image.new(350,350);
-f = Font("Arial", 18);
-i.draw({ |ii|
-	35.do{
-		35.do{
-			Pen.stringAtPoint("A".asString, Point(rrand(0, 350), rrand(0, 350)), f, Color.black);
-		};
-	};
-	Pen.fill;
-    }).plot(freeOnClose:true); //background:Color.white);
-p = i.pixels;
-//i.free;
-p.postln;
-p.size.postln;
-
-p[3000].postln;
-red = p[3000] >> 24 & 0xFF;
-red.postln;
-green = p[3000] >> 16 & 0xFF;
-green.postln;
-blue = p[3000] >> 8 & 0xFF;
-blue.postln;
-alpha = p[3000] & 0xFF;
-alpha.postln;
-
-p[122499].postln;
-red = p[122499] >> 24 & 0xFF;
-red.postln;
-green = p[122499] >> 16 & 0xFF;
-green.postln;
-blue = p[122499] >> 8 & 0xFF;
-blue.postln;
-alpha = p[122499] & 0xFF;
-alpha.postln;
-)
-
-350*350
-p[122149]
-p = Int32Array.fill(350*350, {|i| 3.rand });
-p.plot;
-
-
-////////////////////////////////
-//visual tester (not working at the moment)
-(
-var red, point;
-w = Window.new("tester", Rect(50, 50, 350, 350)).front;
-w.view.background_(Color.white);
-w.drawFunc = {
-	Pen.color = Color.black;
-	350.do{ |y|
-		350.do{ |x|
-			point = ((x+1)*(y+1))-1;
-			red = p[point] >> 24 & 0xFF;
-			if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1, red >= 128
-		};
-	};
-	Pen.stroke;
-};
-w.refresh;
-)
-
-////////////////////////////////////
-//printTester
-(
-Tdef(\printtTster, {
-	var direct = 0, line = Int32Array.new(350), point, red;
-	350.do{ |y|
-
-		line = Int32Array.new(350);
-		350.do{ |i|
-			line.add(p.pop);
-		};
-
-		350.do{ |x|
-
-			q.arduino.send($w, $s, 1, direct);
-			0.05.wait;
-			if(direct == 0, { point = line[x]; },
-				{ point = line.pop; });
-			red = point >> 24 & 0xFF;
-			if(red >= 64, {
-				q.arduino.send($w, $o);
-				0.05.wait;
-			});
-		};
-
-		q.arduino.send($w, $t, 7, 1);
-		0.1.wait;
-		direct = 1-direct;
-	};
-}).play;
-)
-
---> spiegelverkehrt.
--->data from p5
--->anordnung
-
-
-
-(
-
 //____________________________________________________________________________________________________________________________________
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////SETUP
@@ -206,7 +49,7 @@ q.nextLine; //next Event for the printing process
 q.counter = 0;
 q.rev = 1;
 
-q.freqsFilt = [60, 68, 60, 62, 60, 62, 60];
+q.freqsFilt = [60, 68];
 q.space = 32;
 q.freq = 0;
 
@@ -224,6 +67,7 @@ q.currentLine = q.currentLine ++ pxl;
 
 //////////////////////////////
 //OSC-Send setup for Processing
+
 (
 m = NetAddr("127.0.0.1", 12000);  //define remote adress and port
 q.oscTX = { |q, val1 |
@@ -269,51 +113,52 @@ q.pxlBuffer = q.pxlBuffer ++ msg;
 //////////////////////////////////////////
 //Serial Communication for Arduino
 
-//q.arduino = "Arduino";
- (
- q.arduino = ArduinoSMS(
- 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
- 	baudrate: 115200    //check that baudrate is the same as in arduino sketch
- );
-);
+q.arduino = "Arduino";
+
+// (
+// q.arduino = ArduinoSMS(
+// 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
+// 	baudrate: 115200,    //check that baudrate is the same as in arduino sketch
+// );
+// );
 
 
-/////////////////
-//Event Setup for Aruino
-
-///mapping
-q.mapping = (
-	rls: [$d, 2],
-	srv: [$s, 3],
-	led: [$a, 5],
-	stp: [$t, 8]
-);
-
-///EventType
-q.motorOffset = 0;
-q.p5Offset = -10;
-
-(
-Event.addEventType(\mechan, {
-	var adst = ~adst ? $d;
-	var pin = ~pin ? 2;
-	var val = ~val ? 0;
-	var val1 = ~val1, val2 = ~val2, val3 = ~val3;
-	if(pin.isNumber.not) {			// map symbols across dictionary
-		pin = q.mapping.at(pin);
-		adst = pin[0];
-		pin = pin[1];
-	};
-	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.motorOffset, {
-	q.arduino.send($w, adst, pin, val);
-	//});
-	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.p5Offset, {
-	q.oscTX(val1, val2, val3);
-	//"val1, val2, val3".postln;
-	//});
-
-});
-);
+// /////////////////
+// //Event Setup for Aruino
+//
+// ///mapping
+// q.mapping = (
+// 	rls: [$d, 2],
+// 	srv: [$s, 3],
+// 	led: [$a, 5],
+// 	stp: [$t, 8]
+// );
+//
+// ///EventType
+// q.motorOffset = 0;
+// q.p5Offset = -10;
+//
+// (
+// Event.addEventType(\mechan, {
+// 	var adst = ~adst ? $d;
+// 	var pin = ~pin ? 2;
+// 	var val = ~val ? 0;
+// 	var val1 = ~val1, val2 = ~val2, val3 = ~val3;
+// 	if(pin.isNumber.not) {			// map symbols across dictionary
+// 		pin = q.mapping.at(pin);
+// 		adst = pin[0];
+// 		pin = pin[1];
+// 	};
+// 	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.motorOffset, {
+// 	q.arduino.send($w, adst, pin, val);
+// 	//});
+// 	//thisThread.clock.sched( ~timingOffset ? 0.0 + q.p5Offset, {
+// 	q.oscTX(val1, val2, val3);
+// 	//"val1, val2, val3".postln;
+// 	//});
+//
+// });
+// );
 
 
 
@@ -524,7 +369,7 @@ Ndef(\delay, {
 //____________________________________________________________________________________________________________________________________
 //////////////////
 ///////PATTERNS SETUP
-
+/*
 
 Tdef(\printPxl, {
 loop{
@@ -607,7 +452,7 @@ rrand(0.01, 0.2).wait;
 
 //Tdef(\printRand).play;
 //Tdef(\printRand).stop;
-
+*/
 
 //____________________________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -669,7 +514,8 @@ Tdef(\boucle, {
 		//1_Print
 		"1_mechaLoop".postln;
 		Tdef(\printPxl).play;
-		rrand(28, 107).wait;
+
+		//rrand(28, 107).wait;
 		Tdef(\printPxl).stop;
 
 		//Crackling
@@ -709,3 +555,4 @@ Tdef(\boucle, {
 });
 
 );
+
