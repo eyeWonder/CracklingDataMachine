@@ -8,71 +8,15 @@
 /*
 ///////////////////
 TODO!!!!!!!!!!!!
---> character randomizer
+--> character pixel randomizer
+--> network activity riddim
+--> how to go to next image???
 */
 
 
+//only runs on appClock (inside tdef add .defer)
 
-
-q = ();
-
-(
-q.arduino = ArduinoSMS(
-	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
-	baudrate: 38400    //check that baudrate is the same as in arduino sketch
-);
-);
-
-//q.arduino.close;
-q.arduino.send($w, $o); //solenoid
-q.arduino.send($w, $s,1, 1); //stepper x (speed, steps)
-q.arduino.send($w, $t, 1, 1); //stepper y (speed, steps)
-q.arduino.send($w, $s, 1, 1); //stepper x (speed, steps)
-q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps)
-
-
-/////////////////////////////////////////
-//get letters from p5 and place it in meaningful manners
-
-q.wordBuffer = q.charBuffer.asAscii.asString.split($ );
-//removeItems (items: ",().?/!?;:_")
-
-(
-var red, green, blue, alpha, font, xpos = 0, ypos = 0, word;
-q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
-q.image.draw({
-	var xrand = rrand(0.2, 1.9);
-	var yrand = rrand(0.8, 2.1);
-	q.wordBuffer.size.do{ |i|
-		xpos = xpos+(i*xrand);
-		ypos = ypos+yrand;
-		Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), font, Color.black);
-		if(xpos >= q.pxlRes[0], { xpos = 0 });
-		if(ypos >= q.pxlRes[1], { ypos = 0 });
-	};
-	Pen.fill;
-}).plot(freeOnClose:true, background:Color.white);
-q.imagePixel = q.image.pixels;
-//i.free;
-//p.postln;
-//p.size.postln;
-
-q.imagePixel[3000].postln;
-red = q.imagePixel[3000] >> 24 & 0xFF;
-red.postln;
-green = q.imagePixel[3000] >> 16 & 0xFF;
-green.postln;
-blue = q.imagePixel[3000] >> 8 & 0xFF;
-blue.postln;
-alpha = q.imagePixel[3000] & 0xFF;
-alpha.postln;
-)
-
-
-//appClock!!
-var red, green, blue, alpha, font, xpos = 0, ypos = 0;
-
-q.newImage = {
+q.newImage = { |q|
 	q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
 	q.image.draw({
 		var xpos = 0, ypos = 0;
@@ -86,59 +30,10 @@ q.newImage = {
 			if(ypos >= q.pxlRes[1], { ypos = 0 });
 		};
 		Pen.fill;
-	});
+	}).plot(freeOnClose:true, background:Color.white);
 	q.imagePixel = q.image.pixels;
-	q.image.free;
-	//q.imagePixel.postln;
-	q.imagePixel[5000].postln;
+	//q.image.free;
 };
-
-
-
-
-Tdef(\imageTester, {
-	loop{
-	{q.newImage}.defer;
-		5.wait;
-	}
-}).play;
-
-
-////////////////////////////////////
-//printTester
-(
-Tdef(\printTester, {
-	var direct = 1, line = Int32Array.new(350), point, red;
-	350.do{ |y|
-
-		line = Int32Array.new(350);
-		350.do{ |i|
-			line.add(q.imagePixel.pop);
-		};
-
-		350.do{ |x|
-
-			q.arduino.send($w, $s, 1, direct);
-			q.printSpeed.wait;
-			if(direct == 1, { point = line.pop; },
-				{ point = line[x]; });
-			red = point >> 24 & 0xFF;
-			if(red >= 96, {
-				q.arduino.send($w, $o);
-				q.printSpeed.wait;
-			});
-		};
-
-		q.arduino.send($w, $t, q.stepsPerLine, 1);
-		(q.printSpeed*2).wait;
-		direct = 1-direct;
-	};
-}).play;
-)
-
-Tdef(\printTester).pause;
-Tdef(\printTester).resume;
-
 
 
 //(
@@ -173,12 +68,22 @@ q = ();   //set variable as dictionary
 //////////////////////////////////////////
 //Serial Communication for Arduino
 
+
 (
-	q.arduino = ArduinoSMS(
-		"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
-		baudrate: 115200    //check that baudrate is the same as in arduino sketch
-	);
+q.arduino = ArduinoSMS(
+	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
+	baudrate: 38400    //check that baudrate is the same as in arduino sketch
 );
+);
+
+
+//q.arduino.close;
+//q.arduino.send($w, $o); //solenoid
+//q.arduino.send($w, $s,1, 1); //stepper x (speed, steps)
+//q.arduino.send($w, $t, 1, 1); //stepper y (speed, steps)
+//q.arduino.send($w, $s, 1, 1); //stepper x (speed, steps)
+//q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps)
+
 
 /////////////////////////////////
 //Global Variables and Buffers
@@ -191,25 +96,15 @@ q.printSpeed = 0.05; //duration of each step, min 0.04
 q.stepsPerLine = 7;
 q.font = Font("Arial", 14);
 q.direct = 0;
-q.imagePixel;
 q.image;
+q.imagePixel;
+
 
 //variables sound
-q.freqsFilt = [60, 68, 60, 62, 60, 62, 60];
 q.space = 32;
-q.freq = 0;
-
-
-//PixelArrray for one line
-q.nextLine = { |q|
-	q.currentLine = [];
-	q.pxlRes[0].do{
-		var pxl = q.pxlBuffer.pop;
-		q.currentLine = q.currentLine ++ pxl;
-	};
-	\nextline;
-};
-
+q.freq;
+q.charFreqs = [];
+q.charFreqsRevIndex = 2000;
 
 //////////////////////////////
 //OSC-Send setup for Processing
@@ -220,25 +115,21 @@ q.oscTX = { |q, val1 |
 };
 );
 
-//q.oscTX(1); !!wait!!
+//q.oscTX(1); send me data
 
 ////////////////////////////////
 //OSC-Receive setup from Processing
 
 (
 n = NetAddr("127.0.0.1", nil);
-q.oscRX = OSCdef(\oscMSG, {|msg, time, addr, recvPort|
+q.rxPrint = OSCdef(\rxPrint, {|msg, time, addr, recvPort|
 	msg.postln;
 	msg.removeAt(0);
 	msg.size.postln;
-	q.charBuffer = msg;
+	q.charBuffer = msg; //write tu ascii character buffer
+	q.wordBuffer = q.charBuffer.asAscii.asString.removeItems(items: ",().?/!?;:_").split($ ); //make a string
 }, '/chat', n);
 );
-
-
-
-
-
 
 /////////////////
 //Event Setup for Aruino
@@ -278,18 +169,19 @@ Event.addEventType(\mechan, {
 );
 
 
-
 /////////////////
 //collect Pixel data to use it as sound frequency
 
 (
 q.nextFreqs = { |q|
-	20.do{
-		q.freq = q.pxlBuffer.pop;
+	20.do{ |i|
+		q.freq = q.charBuffer[q.charFreqsRevIndex];
 		if ( q.freq > q.space,
-			{q.freqsFilt = q.freqsFilt ++ q.freq;});
+			{q.charFreqs = q.charFreqs++q.freq;});
 	};
-	q.freqsFilt;
+	q.charFreqsRevIndex = q.charFreqsRevIndex -1;
+	if ( q.charFreqsRevIndex <= 0, {q.charFreqsRevIndex = q.charBuffer.size }; );
+	q.charFreqs;
 };
 );
 
@@ -297,9 +189,13 @@ q.nextFreqs = { |q|
 //____________________________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////Print Setup
+
 (
 Tdef(\printSetup, {
-	q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps) *80!!!
+	80.do{
+		q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps) *80!!!
+		0.1.wait;
+	}
 }).play;
 
 
@@ -357,7 +253,7 @@ Ndef(\wifiChan, { |amp = 1.2, start = 0, bufnum = 0, trig|
 //droneOndesModulation
 
 Ndef(\droneOndes, { |amp = 0.2|
-	var freqs = q.nextFreqs * 1;
+	var freqs = q.nextFreqs;
 	var in = Ndef.ar(\wifi, 1, 0) ;
 	var analyze = Amplitude.ar(in);
 	var son = SinOsc.ar(freqs * SinOsc.ar(0.01).range(-0.1, 0.1)).sum * in;
@@ -453,8 +349,8 @@ Tdef(\droneSin, {
 (
 Tdef(\dronePulse, {
 	loop{
-		Ndef(\sin, {
-			var son = LFPulse.ar([80, 81, 121, 160, 239].choose, 0, Rand(0.5, 1));
+		Ndef(\pulse, {
+			var son = LFPulse.ar(q.nextFreqs.choose, 0, Rand(0.5, 1));
 			//son = RLPF.ar(son, 1000, 0.5);
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
@@ -495,88 +391,41 @@ Ndef(\delay, {
 //////////////////
 ///////PATTERNS SETUP
 
+/////////Printer
+(
+Tdef(\printer, {
+	var direct = 1, line, point, red;
+	q.pxlRes[1].do{ |y|
 
-Tdef(\printPxl, {
-	loop{
-		q.nextLine;
-		0.4.wait;
-		q.currentLine.postln;
-		q.counter = 0;
-		0.4.wait;
-		q.arduino.send($w, $c, 1, 550); //DC get Back
-		1.5.wait;
-		//q.arduino.send($w, $d, 1, 400); //DC to starting Point, Hardware starting Point?
-		//1.wait;
-		q.arduino.send($w, $s, 10, 7); //Stepper next Line
-		1.5.wait;
-		//q.arduino.send($w, $o);
-		//0.1.wait;
-		q.pxlRes[0].do( //For each Line
-			{
-				var pxl = q.currentLine[q.counter];
-				q.counter = q.counter + 1;
-				if(pxl == 1, {
-					q.arduino.send($w, $o);  //Pen up or down --> black or white
-				});
-				0.05.wait;
-				q.arduino.send($w, $d, 1, 1.0);   				//DC next Pixel
-				pxl.postln;
-				0.05.wait;
+		line = Int32Array.new(q.pxlRes[0]);
+		q.pxlRes[0].do{ |i|
+			line.add(q.imagePixel.pop);
+		};
 
-		});
-		0.1.wait;
-		//q.arduino.send($w, $o);
-		//0.1.wait;
+		q.pxlRes[0].do{ |x|
+
+			q.arduino.send($w, $s, 1, direct);
+			q.printSpeed.wait;
+			if(direct == 1, { point = line.pop; },
+				{ point = line[x]; });
+			red = point >> 24 & 0xFF;
+			if(red >= 96, {
+				q.arduino.send($w, $o);
+				q.printSpeed.wait;
+			});
+		};
+
+		q.arduino.send($w, $t, q.stepsPerLine, 1);
+		(q.printSpeed*2).wait;
+		direct = 1-direct;
 	};
-
 });
+)
 
+//Tdef(\printer).play;
+//Tdef(\printer).pause;
+//Tdef(\printer).resume;
 
-//Tdef(\printPxl).play;
-//Tdef(\printPxl).stop;
-
-
-/////
-//RandomPrint
-
-Tdef(\printRand, {
-	loop{
-		q.nextLine;
-		0.4.wait;
-		q.currentLine.postln;
-		q.counter = 0;
-		0.4.wait;
-		q.arduino.send($w, $c, 1, 550); //DC get Back
-		rrand(1.5, 2.5).wait;
-		//q.arduino.send($w, $d, 1, 400); //DC to starting Point, Hardware starting Point?
-		//1.wait;
-		q.arduino.send($w, $s, 10, 7); //Stepper next Line
-		rrand(1.5, 2.5).wait;
-		//q.arduino.send($w, $o);
-		//0.1.wait;
-		q.pxlRes[0].do( //For each Line
-			{
-				var pxl = q.currentLine[q.counter];
-				q.counter = q.counter + 1;
-				if(pxl == 1, {
-					q.arduino.send($w, $o);  //Pen up or down --> black or white
-				});
-				rrand(0.01, 0.2).wait;
-				q.arduino.send($w, $d, 1, 1.0);   				//DC next Pixel
-				pxl.postln;
-				rrand(0.01, 0.2).wait;
-
-		});
-		0.1.wait;
-		//q.arduino.send($w, $o);
-		//0.1.wait;
-	};
-
-});
-
-
-//Tdef(\printRand).play;
-//Tdef(\printRand).stop;
 
 
 //____________________________________________________________________________________________________________________________________
@@ -588,14 +437,18 @@ Tdef(\boucle, {
 	var chooser;
 	loop{
 
+		/*toDo loop!!!
+		q.nextFreqs!!
+		*/
+
+
 		/*
 		Ndef(\mechaLoop).set(\start, 0, \amp, 0.3, \trig, 0);
 		Ndef(\mechaLoopNoise).set(\start, 0, \amp, 1.7, \trig, 0);
 		q.arduino.send($w, $d, 2, 0);
 		*/
 
-		"Data".postln;
-
+		"new Data".postln;
 		//send me some pxlData
 		q.oscTX(1);
 		2.5.wait;
@@ -607,8 +460,8 @@ Tdef(\boucle, {
 			[Ndef(\impulseRid), Pdef(\impulseRid)],
 			[Ndef(\blipRid), Pdef(\blipRid)],
 			[Tdef(\droneSin)],
-			[Ndef(\delay)]].choose;
-		//[Tdef(\dronePulse)]
+			[Ndef(\delay)]
+			[Tdef(\dronePulse)]].choose;
 		chooser.postln;
 		chooser[0].play;
 		try{ chooser[1].play; };
@@ -627,44 +480,12 @@ Tdef(\boucle, {
 		Tdef(\dronePulse).stop;
 		15.wait;
 
-		//1_Print
-		"1_mechaLoop".postln;
-		Tdef(\printPxl).play;
+		//printer
+		"printer".postln;
+		Tdef(\printer).play;
 		rrand(28, 107).wait;
-		Tdef(\printPxl).stop;
+		Tdef(\printer).stop;
 
-		//Crackling
-		"Crackling".postln;
-		chooser = [[Ndef(\wifiLoop)],
-			[Ndef(\droneOndes)],
-			[Ndef(\impulseRid), Pdef(\impulseRid)],
-			[Ndef(\blipRid), Pdef(\blipRid)],
-			[Tdef(\droneSin)],
-			[Ndef(\delay)]].choose;
-		//[Tdef(\dronePulse)]
-		chooser.postln;
-		chooser[0].play;
-		try{ chooser[1].play; };
-		try{ chooser[2].play; };
-
-		rrand(19, 41).wait;
-
-		Ndef(\wifiLoop).stop;
-		Ndef(\droneOndes).stop(30);
-		Ndef(\impulseRid).stop(20);
-		Pdef(\impulseRid).stop;
-		Ndef(\blipRid).stop;
-		Pdef(\blipRid).stop;
-		Ndef(\delay).stop(35);
-		Tdef(\droneSin).stop;
-		Tdef(\dronePulse).stop;
-		15.wait;
-
-		//2_PrintRand
-		"2_printRand".postln;
-		Tdef(\printRand).play;
-		rrand(41, 97).wait;
-		Tdef(\printRand).stop;
 
 	};
 });
@@ -680,30 +501,30 @@ Tdef(\boucle, {
 //Serial Tests
 (
 Tdef(\tester, {
-	350.do{
-		q.arduino.send($w, $s, 1, 0);
-		0.1.wait;
-		q.arduino.send($w, $o);
-		0.1.wait;
-	};
+350.do{
+q.arduino.send($w, $s, 1, 0);
+0.1.wait;
+q.arduino.send($w, $o);
+0.1.wait;
+};
 }).play;
 )
 
 (
 Tdef(\tester, {
-	var direct = 0;
-	350.do{|y|
-		350.do{|x|
-			q.arduino.send($w, $s, 1, direct);
-			0.05.wait;
-			if(0.5.coin==true,  {q.arduino.send($w, $o);});
-			//q.arduino.send($w, $o);
-			0.05.wait;
-		};
-		q.arduino.send($w, $t, 6, 1);
-		0.1.wait;
-		direct = 1-direct;
-	};
+var direct = 0;
+350.do{|y|
+350.do{|x|
+q.arduino.send($w, $s, 1, direct);
+0.05.wait;
+if(0.5.coin==true,  {q.arduino.send($w, $o);});
+//q.arduino.send($w, $o);
+0.05.wait;
+};
+q.arduino.send($w, $t, 6, 1);
+0.1.wait;
+direct = 1-direct;
+};
 }).play;
 )
 
@@ -718,12 +539,12 @@ var red, green, blue, alpha;
 i = Image.new(350,350);
 f = Font("Arial", 18);
 i.draw({ |ii|
-	35.do{
-		35.do{
-			Pen.stringAtPoint("A".asString, Point(rrand(0, 350), rrand(0, 350)), f, Color.black);
-		};
-	};
-	Pen.fill;
+35.do{
+35.do{
+Pen.stringAtPoint("A".asString, Point(rrand(0, 350), rrand(0, 350)), f, Color.black);
+};
+};
+Pen.fill;
 }).plot(freeOnClose:true); //background:Color.white);
 p = i.pixels;
 //i.free;
@@ -754,18 +575,81 @@ var red, point;
 w = Window.new("tester", Rect(50, 50, 350, 350)).front;
 w.view.background_(Color.white);
 w.drawFunc = {
-	Pen.color = Color.black;
-	350.do{ |y|
-		350.do{ |x|
-			point = ((x+1)*(y+1))-1;
-			red = p[point] >> 24 & 0xFF;
-			if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1, red >= 128
-		};
-	};
-	Pen.stroke;
+Pen.color = Color.black;
+350.do{ |y|
+350.do{ |x|
+point = ((x+1)*(y+1))-1;
+red = p[point] >> 24 & 0xFF;
+if(p[((x+1)*(y+1))-1]==1, { Pen.line(Point(x, y), Point(x+1,y+1)); });  //p[((x+1)*(y+1))-1]==1, red >= 128
+};
+};
+Pen.stroke;
 };
 w.refresh;
 )
+
+
+(
+var red, green, blue, alpha, font, xpos = 0, ypos = 0, word;
+q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
+q.image.draw({
+var xrand = rrand(0.2, 1.9);
+var yrand = rrand(0.8, 2.1);
+q.wordBuffer.size.do{ |i|
+xpos = xpos+(i*xrand);
+ypos = ypos+yrand;
+Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), font, Color.black);
+if(xpos >= q.pxlRes[0], { xpos = 0 });
+if(ypos >= q.pxlRes[1], { ypos = 0 });
+};
+Pen.fill;
+}).plot(freeOnClose:true, background:Color.white);
+q.imagePixel = q.image.pixels;
+//i.free;
+//p.postln;
+//p.size.postln;
+
+q.imagePixel[3000].postln;
+red = q.imagePixel[3000] >> 24 & 0xFF;
+red.postln;
+green = q.imagePixel[3000] >> 16 & 0xFF;
+green.postln;
+blue = q.imagePixel[3000] >> 8 & 0xFF;
+blue.postln;
+alpha = q.imagePixel[3000] & 0xFF;
+alpha.postln;
+)
+
+
+
+//only runs on appClock (.defer)
+
+q.newImage = { |q|
+q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
+q.image.draw({
+var xpos = 0, ypos = 0;
+var xrand = rrand(0.2, 1.9);
+var yrand = rrand(0.8, 2.1);
+q.wordBuffer.size.do{ |i|
+xpos = xpos+(i*xrand);
+ypos = ypos+yrand;
+Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), q.font, Color.black);
+if(xpos >= q.pxlRes[0], { xpos = 0 });
+if(ypos >= q.pxlRes[1], { ypos = 0 });
+};
+Pen.fill;
+}).plot(freeOnClose:true, background:Color.white);
+q.imagePixel = q.image.pixels;
+//q.image.free;
+};
+
+
+Tdef(\imageTester, {
+loop{
+{q.newImage}.defer;
+5.wait;
+}
+}).play;
 
 
 
