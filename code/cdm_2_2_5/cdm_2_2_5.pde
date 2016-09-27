@@ -162,7 +162,7 @@ public void setup() {
   }
   if (sb.toString().trim().equals("")) {
     System.out.println("You Are Not Connected to the Internet");
-    System.exit(0);
+  //  System.exit(0);
   }
   System.out.println("You Are Connected to the Internet");
 

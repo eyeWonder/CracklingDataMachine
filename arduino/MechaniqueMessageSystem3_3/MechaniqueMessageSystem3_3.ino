@@ -29,7 +29,7 @@ Adafruit_StepperMotor *myMotor2 = AFMS.getStepper(48, 2);
 
 
 int solenoid = 5;
-
+int crashSensor = 6;
 
 void setup()
 {
@@ -71,6 +71,12 @@ void loop()
 void readpins() { // Read pins (analog or digital)
 
   switch (messageGetChar()) { // Gets the next word as a character
+
+    case 'b': // READ digital pins
+
+      messageSendInt(digitalRead(crashSensor));
+      messageEnd(); // Terminate the message being sent
+      break; // Break from the switch
 
     case 'd': // READ digital pins
 
@@ -201,6 +207,8 @@ void writepin() { // Write pin
   break;
 
 */
+
+
 
 
 

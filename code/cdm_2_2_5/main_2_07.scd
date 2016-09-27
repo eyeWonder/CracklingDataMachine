@@ -11,32 +11,11 @@ TODO!!!!!!!!!!!!
 --> character pixel randomizer
 --> network activity riddim
 --> how to go to next image???
+--> crash button
 */
 
 
-//only runs on appClock (inside tdef add .defer)
-
-q.newImage = { |q|
-	q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
-	q.image.draw({
-		var xpos = 0, ypos = 0;
-		var xrand = rrand(0.2, 1.9);
-		var yrand = rrand(0.8, 2.1);
-		q.wordBuffer.size.do{ |i|
-			xpos = xpos+(i*xrand);
-			ypos = ypos+yrand;
-			Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), q.font, Color.black);
-			if(xpos >= q.pxlRes[0], { xpos = 0 });
-			if(ypos >= q.pxlRes[1], { ypos = 0 });
-		};
-		Pen.fill;
-	}).plot(freeOnClose:true, background:Color.white);
-	q.imagePixel = q.image.pixels;
-	//q.image.free;
-};
-
-
-//(
+(
 
 //___________________________________________________________________________________________________
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,12 +47,14 @@ q = ();   //set variable as dictionary
 //////////////////////////////////////////
 //Serial Communication for Arduino
 
+q.crashRX;
 
 (
 q.arduino = ArduinoSMS(
 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
 	baudrate: 38400    //check that baudrate is the same as in arduino sketch
 );
+q.arduino.action = { |... msg| q.crashRX = msg; msg.postln };
 );
 
 
@@ -89,13 +70,13 @@ q.arduino = ArduinoSMS(
 //Global Variables and Buffers
 
 q.pxlRes =  [350, 350];
-q.charBuffer = [];
+q.charBuffer = [111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
 
 //variables printin
 q.printSpeed = 0.05; //duration of each step, min 0.04
 q.stepsPerLine = 7;
 q.font = Font("Arial", 14);
-q.direct = 0;
+q.direct = 1;
 q.image;
 q.imagePixel;
 
@@ -104,10 +85,36 @@ q.imagePixel;
 q.space = 32;
 q.freq;
 q.charFreqs = [];
-q.charFreqsRevIndex = 2000;
+q.charFreqsRevIndex = 64;
+
+
+///////////////////////////
+//Print Function
+
+
+//only runs on appClock (inside tdef add .defer)
+q.newImage = { |q|
+	q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
+	q.image.draw({
+		var xpos = 0, ypos = 0;
+		var xrand = rrand(0.2, 1.9);
+		var yrand = rrand(0.8, 2.1);
+		q.wordBuffer.size.do{ |i|
+			xpos = xpos+(i*xrand);
+			ypos = ypos+yrand;
+			Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), q.font, Color.black);
+			if(xpos >= q.pxlRes[0], { xpos = 0 });
+			if(ypos >= q.pxlRes[1], { ypos = 0 });
+		};
+		Pen.fill;
+	}).plot(freeOnClose:true, background:Color.white);
+	q.imagePixel = q.image.pixels;
+	//q.image.free;
+};
+
 
 //////////////////////////////
-//OSC-Send setup for Processing
+//OSC-Setup for communication with Processing
 (
 m = NetAddr("127.0.0.1", 12000);  //define remote adress and port
 q.oscTX = { |q, val1 |
@@ -115,10 +122,7 @@ q.oscTX = { |q, val1 |
 };
 );
 
-//q.oscTX(1); send me data
-
-////////////////////////////////
-//OSC-Receive setup from Processing
+//q.oscTX(1); send me some data
 
 (
 n = NetAddr("127.0.0.1", nil);
@@ -128,17 +132,17 @@ q.rxPrint = OSCdef(\rxPrint, {|msg, time, addr, recvPort|
 	msg.size.postln;
 	q.charBuffer = msg; //write tu ascii character buffer
 	q.wordBuffer = q.charBuffer.asAscii.asString.removeItems(items: ",().?/!?;:_").split($ ); //make a string
+	{q.newImage}.defer;
 }, '/chat', n);
 );
 
 /////////////////
-//Event Setup for Aruino
+//Event Setup for Arduino (mechanic riddims)
 
 ///mapping
 q.mapping = (
 	rls: [$d, 2],
 	srv: [$s, 3],
-	led: [$a, 5],
 	stp: [$t, 8]
 );
 
@@ -176,30 +180,50 @@ Event.addEventType(\mechan, {
 q.nextFreqs = { |q|
 	20.do{ |i|
 		q.freq = q.charBuffer[q.charFreqsRevIndex];
-		if ( q.freq > q.space,
-			{q.charFreqs = q.charFreqs++q.freq;});
+		q.charFreqs.add(;
+		/*if ( q.freq > q.space,
+		{q.charFreqs = q.charFreqs++q.freq;});*/
+		q.charFreqsRevIndex = q.charFreqsRevIndex -1;
+		if ( q.charFreqsRevIndex <= 0, {q.charFreqsRevIndex = q.charBuffer.size }; );
 	};
-	q.charFreqsRevIndex = q.charFreqsRevIndex -1;
-	if ( q.charFreqsRevIndex <= 0, {q.charFreqsRevIndex = q.charBuffer.size }; );
 	q.charFreqs;
 };
 );
 
 
-//____________________________________________________________________________________________________________________________________
+//___________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////Print Setup
 
+///////////////////////////
+//get first Data
+
+(
+Tdef(\firstData, {
+	"first Data".postln;
+	//send me some pxlData
+	q.oscTX(1);
+	15.wait;
+}).play;
+);
+
+Tdef(\firstData).clear;
+
+/*
 (
 Tdef(\printSetup, {
-	80.do{
-		q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps) *80!!!
-		0.1.wait;
-	}
+q.arduino.send($r, $b);
+while({ q.crashRX == 0 }, { q.arduino.send($w, $s, 1, q.direct-1); 0.5.wait; });
+80.do{
+q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps) *80!!!
+0.1.wait;
+}
 }).play;
+);
+*/
 
 
-//____________________________________________________________________________________________________________________________________
+//__________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////SOUND SETUP
 
@@ -419,20 +443,23 @@ Tdef(\printer, {
 		(q.printSpeed*2).wait;
 		direct = 1-direct;
 	};
+	"new Data".postln;
+	//send me some pxlData
+	q.oscTX(1);
+	5.wait;
+
 });
-)
+);
 
 //Tdef(\printer).play;
 //Tdef(\printer).pause;
 //Tdef(\printer).resume;
 
-
-
 //____________________________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////LOOP
 
-
+(
 Tdef(\boucle, {
 	var chooser;
 	loop{
@@ -448,10 +475,7 @@ Tdef(\boucle, {
 		q.arduino.send($w, $d, 2, 0);
 		*/
 
-		"new Data".postln;
-		//send me some pxlData
-		q.oscTX(1);
-		2.5.wait;
+		2.wait;
 
 		//Crackling
 		"Crackling".postln;
@@ -489,6 +513,7 @@ Tdef(\boucle, {
 
 	};
 });
+);
 
 );
 
