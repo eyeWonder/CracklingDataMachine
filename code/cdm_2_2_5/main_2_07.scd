@@ -10,23 +10,23 @@
 TODO!!!!!!!!!!!!
 --> character pixel randomizer
 --> network activity riddim
---> how to go to next image???
 --> crash button
+--> ad image.free and remove .plot
+--> shutdown time
+--> negative direction on paper...
 */
-
 
 (
 
 //___________________________________________________________________________________________________
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////SETUP
-
-
-/////////////////////////////
-//Boot audio server
+///////Setup routine (boot audio server, initialize printer)
 
 (
 Tdef(\setup, {
+
+	//start audio server
 	s.quit;
 	0.5.wait;
 	s = Server.local;
@@ -36,11 +36,34 @@ Tdef(\setup, {
 	s.options.blockSize = 512;
 	0.5.wait;
 	s.boot;
-	3.wait;
+	5.wait;
+
+	//get first Data
+	"first Data".postln;
+	q.oscTX(1);
+	15.wait;
+
+	//start Loop
 	Tdef(\boucle).play;
 }).play;
 );
 
+/*
+(
+Tdef(\printSetup, {
+q.arduino.send($r, $b);
+while({ q.crashRX == 0 }, { q.arduino.send($w, $s, 1, q.direct-1); 0.5.wait; });
+80.do{
+q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps) *80!!!
+0.1.wait;
+}
+}).play;
+);
+*/
+
+//___________________________________________________________________________________________________
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//global dictionary
 
 q = ();   //set variable as dictionary
 
@@ -90,7 +113,6 @@ q.charFreqsRevIndex = 64;
 
 ///////////////////////////
 //Print Function
-
 
 //only runs on appClock (inside tdef add .defer)
 q.newImage = { |q|
@@ -178,9 +200,10 @@ Event.addEventType(\mechan, {
 
 (
 q.nextFreqs = { |q|
+	q.charFreqs = [];
 	20.do{ |i|
 		q.freq = q.charBuffer[q.charFreqsRevIndex];
-		q.charFreqs.add(;
+		q.charFreqs = q.charFreqs++(q.freq);
 		/*if ( q.freq > q.space,
 		{q.charFreqs = q.charFreqs++q.freq;});*/
 		q.charFreqsRevIndex = q.charFreqsRevIndex -1;
@@ -189,39 +212,6 @@ q.nextFreqs = { |q|
 	q.charFreqs;
 };
 );
-
-
-//___________________________________________________________________________________________________________________
-////////////////////////////////////////////////////////////////////////////////////////////////
-///////Print Setup
-
-///////////////////////////
-//get first Data
-
-(
-Tdef(\firstData, {
-	"first Data".postln;
-	//send me some pxlData
-	q.oscTX(1);
-	15.wait;
-}).play;
-);
-
-Tdef(\firstData).clear;
-
-/*
-(
-Tdef(\printSetup, {
-q.arduino.send($r, $b);
-while({ q.crashRX == 0 }, { q.arduino.send($w, $s, 1, q.direct-1); 0.5.wait; });
-80.do{
-q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps) *80!!!
-0.1.wait;
-}
-}).play;
-);
-*/
-
 
 //__________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -244,10 +234,8 @@ Ndef(\wifi, { | amp = 3.5|
 });
 );
 
-
 //Ndef(\wifi).play;
 //Ndef(\wifi).stop;
-
 
 (
 Ndef(\wifiLoop, { |amp = 2.0, start = 0, bufnum = 1, trig|
@@ -369,7 +357,6 @@ Tdef(\droneSin, {
 //Tdef(\droneSin).play;
 //Tdef(\droneSin).stop;
 
-
 (
 Tdef(\dronePulse, {
 	loop{
@@ -410,8 +397,7 @@ Ndef(\delay, {
 //Ndef(\delay).stop;
 
 
-
-//____________________________________________________________________________________________________________________________________
+//___________________________________________________________________________________________________________________
 //////////////////
 ///////PATTERNS SETUP
 
@@ -419,34 +405,36 @@ Ndef(\delay, {
 (
 Tdef(\printer, {
 	var direct = 1, line, point, red;
-	q.pxlRes[1].do{ |y|
+	loop{
+		q.pxlRes[1].do{ |y|
 
-		line = Int32Array.new(q.pxlRes[0]);
-		q.pxlRes[0].do{ |i|
-			line.add(q.imagePixel.pop);
-		};
+			line = Int32Array.new(q.pxlRes[0]);
+			q.pxlRes[0].do{ |i|
+				line.add(q.imagePixel.pop);
+			};
 
-		q.pxlRes[0].do{ |x|
+			q.pxlRes[0].do{ |x|
 
-			q.arduino.send($w, $s, 1, direct);
-			q.printSpeed.wait;
-			if(direct == 1, { point = line.pop; },
-				{ point = line[x]; });
-			red = point >> 24 & 0xFF;
-			if(red >= 96, {
-				q.arduino.send($w, $o);
+				q.arduino.send($w, $s, 1, direct);
 				q.printSpeed.wait;
-			});
-		};
+				if(direct == 1, { point = line.pop; },
+					{ point = line[x]; });
+				red = point >> 24 & 0xFF;
+				if(red >= 96, {
+					q.arduino.send($w, $o);
+					q.printSpeed.wait;
+				});
+			};
 
-		q.arduino.send($w, $t, q.stepsPerLine, 1);
-		(q.printSpeed*2).wait;
-		direct = 1-direct;
-	};
-	"new Data".postln;
-	//send me some pxlData
-	q.oscTX(1);
-	5.wait;
+			q.arduino.send($w, $t, q.stepsPerLine, 1);
+			(q.printSpeed*2).wait;
+			direct = 1-direct;
+		};
+		"new Data".postln;
+		//send me some pxlData
+		q.oscTX(1);
+		30.wait;
+	}
 
 });
 );
@@ -455,19 +443,27 @@ Tdef(\printer, {
 //Tdef(\printer).pause;
 //Tdef(\printer).resume;
 
-//____________________________________________________________________________________________________________________________________
+//__________________________________________________________________________________________________________________
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////LOOP
 
 (
 Tdef(\boucle, {
 	var chooser;
+
+	//printer
+	"printer".postln;
+	Tdef(\printer).play;
+	//rrand(28, 107).wait;
+	//Tdef(\printer).stop;
+
+	2.wait;
+
 	loop{
 
 		/*toDo loop!!!
 		q.nextFreqs!!
 		*/
-
 
 		/*
 		Ndef(\mechaLoop).set(\start, 0, \amp, 0.3, \trig, 0);
@@ -475,7 +471,7 @@ Tdef(\boucle, {
 		q.arduino.send($w, $d, 2, 0);
 		*/
 
-		2.wait;
+		Tdef(\printer).resume;
 
 		//Crackling
 		"Crackling".postln;
@@ -484,7 +480,7 @@ Tdef(\boucle, {
 			[Ndef(\impulseRid), Pdef(\impulseRid)],
 			[Ndef(\blipRid), Pdef(\blipRid)],
 			[Tdef(\droneSin)],
-			[Ndef(\delay)]
+			[Ndef(\delay)],
 			[Tdef(\dronePulse)]].choose;
 		chooser.postln;
 		chooser[0].play;
@@ -502,13 +498,8 @@ Tdef(\boucle, {
 		Ndef(\delay).stop(45);
 		Tdef(\droneSin).stop;
 		Tdef(\dronePulse).stop;
+		Tdef(\printer).pause;
 		15.wait;
-
-		//printer
-		"printer".postln;
-		Tdef(\printer).play;
-		rrand(28, 107).wait;
-		Tdef(\printer).stop;
 
 
 	};
