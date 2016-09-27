@@ -8,11 +8,14 @@
 /*
 ///////////////////
 TODO!!!!!!!!!!!!
---> character pixel randomizer
---> network activity riddim
 --> crash button
 --> ad image.free and remove .plot
 --> shutdown time
+--> wait for data
+--> reverse design
+
+--> character pixel randomizer
+--> network activity riddim
 --> negative direction on paper...
 */
 
@@ -119,14 +122,15 @@ q.newImage = { |q|
 	q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
 	q.image.draw({
 		var xpos = 0, ypos = 0;
-		var xrand = rrand(0.2, 1.9);
-		var yrand = rrand(0.8, 2.1);
+		var xrand = rrand(0.9, 1.9);
+		var yrand = rrand(1.1, 5.1);
 		q.wordBuffer.size.do{ |i|
 			xpos = xpos+(i*xrand);
 			ypos = ypos+yrand;
 			Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), q.font, Color.black);
 			if(xpos >= q.pxlRes[0], { xpos = 0 });
 			if(ypos >= q.pxlRes[1], { ypos = 0 });
+			//if(xpos <= 0, { xpos =  q.pxlRes[0]-1});
 		};
 		Pen.fill;
 	}).plot(freeOnClose:true, background:Color.white);
@@ -433,7 +437,8 @@ Tdef(\printer, {
 		"new Data".postln;
 		//send me some pxlData
 		q.oscTX(1);
-		30.wait;
+		60.wait;
+		//?wait for data? OSC??
 	}
 
 });
@@ -499,7 +504,7 @@ Tdef(\boucle, {
 		Tdef(\droneSin).stop;
 		Tdef(\dronePulse).stop;
 		Tdef(\printer).pause;
-		15.wait;
+		rrand(15, 30).wait;
 
 
 	};
