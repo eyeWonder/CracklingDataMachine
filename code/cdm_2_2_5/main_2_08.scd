@@ -13,6 +13,8 @@ TODO!!!!!!!!!!!!
 --> shutdown time
 --> wait for data
 --> reverse design
+--> boot file
+--> blib notes from net
 
 --> character pixel randomizer
 --> network activity riddim
@@ -45,7 +47,7 @@ Tdef(\setup, {
 	//get first Data
 	"first Data".postln;
 	q.oscTX(1);
-	30.wait;
+	60.wait;
 
 	//start Loop
 	Tdef(\boucle).play;
@@ -97,7 +99,7 @@ q.arduino.action = { |... msg| q.crashRX = msg; msg.postln };
 //Global Variables and Buffers
 
 q.pxlRes =  [350, 350];
-q.charBuffer = [111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
+q.charBuffer = [111, 110, 113, 180, 32, 114, 116, 110, 80, 111, 110, 113, 180, 32, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 32, 113, 180, 111, 110, 113, 180, 114, 116, 110, 32, 80, 111, 110, 113, 180, 114, 116, 110, 80, 32, 111, 110, 113, 180, 114, 116, 32, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
 
 //variables printin
 q.printSpeed = 0.2; //duration of each step, min 0.04
@@ -134,9 +136,9 @@ q.newImage = { |q|
 			//if(xpos <= 0, { xpos =  q.pxlRes[0]-1});
 		};
 		Pen.fill;
-	}).plot(freeOnClose:true, background:Color.white);
+	}); //plot(freeOnClose:true, background:Color.white);
 	q.imagePixel = q.image.pixels;
-	//q.image.free;
+	q.image.free;
 };
 
 
@@ -157,8 +159,14 @@ q.rxPrint = OSCdef(\rxPrint, {|msg, time, addr, recvPort|
 	msg.postln;
 	msg.removeAt(0);
 	msg.size.postln;
-	q.charBuffer = msg; //write tu ascii character buffer
-	q.wordBuffer = q.charBuffer.asAscii.asString.removeItems(items: ",().?/!?;:_").split($ ); //make a string
+	q.charBuffer = msg; //write to ascii character buffer
+	q.wordBuffer = [];
+	q.charBuffer.size.do{ |i|
+		var char;
+		char = q.charBuffer[i].asAscii;
+		q.wordBuffer = q.wordBuffer++char
+	};
+	q.wordBuffer = q.wordBuffer.join.asString.removeEvery("/_&%§$<>|\ß~+[]{}…").split($ ); //make a string //.removeItems(items: ",().?/!?;:_")
 	{q.newImage}.defer;
 }, '/chat', n);
 );

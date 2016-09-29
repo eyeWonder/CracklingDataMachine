@@ -9,9 +9,9 @@ headless!!!
 
 sudo Xvfb :1 -screen 0 1024x768x24
 export DISPLAY=":1"
-sudo processing-java --sketch=/home/pi/Desktop/cdm_2_2_2 --output=/home/pi/Desktop/p5output --force --run
+sudo processing-java --sketch=/home/pi/Desktop/cdm_2_2_5 --output=/home/pi/Desktop/p5output --force --run
 sudo /home/pi/bin/Playback_to_Lineout.sh -d
 sudo /home/pi/bin/Record_from_lineIn_Micbias.sh -d
 jackd -P75 -dalsa -dhw:0 -p2048 -n8 -s -r44100
 export DISPLAY=:0.0
-sclang /home/pi/Desktop/cdm_2_2_2/main_2_04_arduino.scd
+sclang /home/pi/Desktop/cdm_2_2_5/main_2_08.scd

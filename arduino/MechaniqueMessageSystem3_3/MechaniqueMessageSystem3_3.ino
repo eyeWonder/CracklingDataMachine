@@ -49,6 +49,9 @@ void setup()
   //Solenoid
   pinMode(solenoid, OUTPUT);
 
+  //crash Sensor
+  pinMode(crashSensor, INPUT);
+
 
 }
 

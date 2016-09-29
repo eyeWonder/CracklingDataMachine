@@ -7,11 +7,20 @@ jackd -P75 -dalsa -dhw:0 -p1024 -n3 -s -r44100 &
 sclang /home/pi/Desktop/main_alpha_2_02/main_alpha_2_02.scd
 
 
+_network
+sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+
+ping raspberrypi.local
+ssh pi@10.42.0.xx
+
 
 _remote desktop
 vncserver :1 -geometry 1024x768 -depth 24
 
 
+
+_file transfer
+scp -rp "main_alpha_2_02" pi@10.42.0.62:Desktop/
 
 
 with carnivore

@@ -8,15 +8,21 @@
 /*
 ///////////////////
 TODO!!!!!!!!!!!!
---> crash button
---> ad image.free and remove .plot
---> shutdown time
 --> wait for data
 --> reverse design
+--> more printing
 
+--> raspberry fast test (for print Routine)
+--> boot file --> shutdown time
+
+--> impulse rid???
+--> blib notes from net
+--> to much wifi (wifi with blip???)
+--> maximize son
+
+--> negative direction on paper...?
 --> character pixel randomizer
 --> network activity riddim
---> negative direction on paper...
 --> scale impression
 */
 
@@ -31,6 +37,7 @@ TODO!!!!!!!!!!!!
 Tdef(\setup, {
 
 	//start audio server
+	0.5.wait;
 	s.quit;
 	0.5.wait;
 	s = Server.local;
@@ -40,30 +47,34 @@ Tdef(\setup, {
 	s.options.blockSize = 512;
 	0.5.wait;
 	s.boot;
-	5.wait;
+	8.wait;
+
+	//printSetup: head position
+	q.arduino.send($r, $b);
+	1.wait;
+	while({ q.crashRX == 1 },
+		{ q.arduino.send($w, $s, 1, q.direct-1);
+			0.05.wait;
+			q.arduino.send($r, $b);
+			0.05.wait;
+	});
+
+	//printSetup: take paper
+	250.do{
+		q.arduino.send($w, $t, 10, 1); //stepper y (speed, steps) *80!!!
+		0.1.wait;
+	};
 
 	//get first Data
 	"first Data".postln;
 	q.oscTX(1);
-	30.wait;
+	60.wait;
 
 	//start Loop
 	Tdef(\boucle).play;
 }).play;
 );
 
-/*
-(
-Tdef(\printSetup, {
-q.arduino.send($r, $b);
-while({ q.crashRX == 0 }, { q.arduino.send($w, $s, 1, q.direct-1); 0.5.wait; });
-80.do{
-q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps) *80!!!
-0.1.wait;
-}
-}).play;
-);
-*/
 
 //___________________________________________________________________________________________________
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,14 +85,14 @@ q = ();   //set variable as dictionary
 //////////////////////////////////////////
 //Serial Communication for Arduino
 
-q.crashRX;
+q.crashRX; //dictionary variable for crash sensor
 
 (
 q.arduino = ArduinoSMS(
 	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
 	baudrate: 38400    //check that baudrate is the same as in arduino sketch
 );
-q.arduino.action = { |... msg| q.crashRX = msg; msg.postln };
+q.arduino.action = { |... msg| q.crashRX = msg[0]; };
 );
 
 
@@ -97,7 +108,7 @@ q.arduino.action = { |... msg| q.crashRX = msg; msg.postln };
 //Global Variables and Buffers
 
 q.pxlRes =  [350, 350];
-q.charBuffer = [111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
+q.charBuffer = [111, 110, 113, 180, 32, 114, 116, 110, 80, 111, 110, 113, 180, 32, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 32, 113, 180, 111, 110, 113, 180, 114, 116, 110, 32, 80, 111, 110, 113, 180, 114, 116, 110, 80, 32, 111, 110, 113, 180, 114, 116, 32, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
 
 //variables printin
 q.printSpeed = 0.2; //duration of each step, min 0.04
@@ -134,9 +145,9 @@ q.newImage = { |q|
 			//if(xpos <= 0, { xpos =  q.pxlRes[0]-1});
 		};
 		Pen.fill;
-	}).plot(freeOnClose:true, background:Color.white);
+	}); //plot(freeOnClose:true, background:Color.white);
 	q.imagePixel = q.image.pixels;
-	//q.image.free;
+	q.image.free;
 };
 
 
@@ -157,8 +168,14 @@ q.rxPrint = OSCdef(\rxPrint, {|msg, time, addr, recvPort|
 	msg.postln;
 	msg.removeAt(0);
 	msg.size.postln;
-	q.charBuffer = msg; //write tu ascii character buffer
-	q.wordBuffer = q.charBuffer.asAscii.asString.removeItems(items: ",().?/!?;:_").split($ ); //make a string
+	q.charBuffer = msg; //write to ascii character buffer
+	q.wordBuffer = [];
+	q.charBuffer.size.do{ |i|
+		var char;
+		char = q.charBuffer[i].asAscii;
+		q.wordBuffer = q.wordBuffer++char
+	};
+	q.wordBuffer = q.wordBuffer.join.asString.removeEvery("/_&%§$<>|\ß~+[]{}…").split($ ); //make a string //.removeItems(items: ",().?/!?;:_")
 	{q.newImage}.defer;
 }, '/chat', n);
 );
@@ -253,18 +270,8 @@ Ndef(\wifiLoop, { |amp = 2.0, start = 0, bufnum = 1, trig|
 });
 );
 
-(
-Ndef(\wifiChan, { |amp = 1.2, start = 0, bufnum = 0, trig|
-	var in = Ndef.ar(\wifi, 1, 0) ;
-	var son = in ! 2;
-	son * amp
-});
-);
-
 //Ndef(\wifiLoop).play;
 //Ndef(\wifiLoop).stop;
-//Ndef(\wifiChan).playN(outs: [0, 1, 2, 3]);
-//Ndef(\wifiChan).stop;
 
 
 //droneOndesModulation
@@ -316,7 +323,7 @@ Pdef(\impulseRid,
 //Ndef(\impulseRid).stop;
 
 (
-Ndef(\blipRid, { |amp = 0.7|
+Ndef(\blipRid, { |amp = 0.9|
 	var son = PanAz.ar(
 		2,                 // numChans
 		Blip.ar(0.5, 100 * SinOsc.kr(0.01).range(0.8, 10)),     // in
@@ -347,8 +354,8 @@ Pdef(\blipRid,
 Tdef(\droneSin, {
 	loop{
 		Ndef(\sin, {
-			var son = SinOsc.ar(q.nextFreqs.choose * 1.2, 0, Rand(0.6, 0.9));
-			son = son * (Ndef.ar(\wifi, 1, 0) * 2);
+			var son = SinOsc.ar(q.nextFreqs.choose, 0, Rand(0.6, 0.9), 0.5);
+			//son = son * (Ndef.ar(\wifi, 1, 0) * 2);
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
 					Drand([-0.5, 0, 0.5, 1], inf)), 0.5, 2)
@@ -366,7 +373,7 @@ Tdef(\droneSin, {
 Tdef(\dronePulse, {
 	loop{
 		Ndef(\pulse, {
-			var son = LFPulse.ar(q.nextFreqs.choose, 0, Rand(0.5, 1));
+			var son = LFPulse.ar(q.nextFreqs.choose, 0, Rand(0.5, 1), 0.2);
 			//son = RLPF.ar(son, 1000, 0.5);
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
@@ -387,13 +394,13 @@ Tdef(\dronePulse, {
 Ndef(\delay, {
 	var input, delayTime, outDelay;
 	// input from sound card
-	input = Ndef.ar(\wifi, 1, 0) * 3.8;
+	input = Ndef.ar(\wifi, 1, 0) * 2.0;
 	// delay time jumps every 2 seconds
 	delayTime = Demand.kr(Impulse.kr(0.2), 0, Dseq([0.4, 0.6, 0.9, 0.3, 0.7], inf));
 	// CombC - delay with feedback
 	CombC.ar(input ! 2, 16, delayTime, 6) + input;
 	input = PanAz.ar(2, input, LFSaw.kr(SinOsc.kr(0.5).range(0.01, 0.05)));
-	input = input * 2;
+	input = input * 0.5;
 	input
 });
 );
@@ -435,6 +442,7 @@ Tdef(\printer, {
 			(q.printSpeed*2).wait;
 			direct = 1-direct;
 		};
+		1.wait;
 		"new Data".postln;
 		//send me some pxlData
 		q.oscTX(1);
@@ -444,6 +452,7 @@ Tdef(\printer, {
 
 });
 );
+
 
 //Tdef(\printer).play;
 //Tdef(\printer).pause;
@@ -467,17 +476,16 @@ Tdef(\boucle, {
 
 	loop{
 
-		/*toDo loop!!!
-		q.nextFreqs!!
-		*/
-
 		/*
 		Ndef(\mechaLoop).set(\start, 0, \amp, 0.3, \trig, 0);
 		Ndef(\mechaLoopNoise).set(\start, 0, \amp, 1.7, \trig, 0);
 		q.arduino.send($w, $d, 2, 0);
 		*/
 
-		Tdef(\printer).resume;
+		Tdef(\printer).pause;
+		0.1.wait;
+		q.nextFreqs;
+		0.1.wait;
 
 		//Crackling
 		"Crackling".postln;
@@ -491,20 +499,28 @@ Tdef(\boucle, {
 		chooser.postln;
 		chooser[0].play;
 		try{ chooser[1].play; };
-		try{ chooser[2].play; };
 
 		rrand(15, 45).wait;
 
-		Ndef(\wifiLoop).stop(60);
-		Ndef(\droneOndes).stop(50);
-		Ndef(\impulseRid).stop(60);
+		Ndef(\wifiLoop).stop(rrand(15, 30));
+		0.1.wait;
+		Ndef(\droneOndes).stop(rrand(15, 30));
+		0.1.wait;
+		Ndef(\impulseRid).stop(rrand(15, 30));
+		0.1.wait;
 		Pdef(\impulseRid).stop;
-		Ndef(\blipRid).stop(50);
+		0.1.wait;
+		Ndef(\blipRid).stop(rrand(15, 30));
+		0.1.wait;
 		Pdef(\blipRid).stop;
-		Ndef(\delay).stop(45);
+		0.1.wait;
+		Ndef(\delay).stop(rrand(15, 30));
+		0.1.wait;
 		Tdef(\droneSin).stop;
+		0.1.wait;
 		Tdef(\dronePulse).stop;
-		Tdef(\printer).pause;
+		0.1.wait;
+		Tdef(\printer).resume;
 		rrand(15, 30).wait;
 
 
