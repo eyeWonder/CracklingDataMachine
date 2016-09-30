@@ -8,17 +8,20 @@
 /*
 ///////////////////
 TODO!!!!!!!!!!!!
---> wait for data
---> reverse design
---> more printing
-
+//!!!!!!!!!!!!!!!!!!!!!!!!!!
 --> raspberry fast test (for print Routine)
---> boot file --> shutdown time
+--> shutdown test!!
+--> maximize (? volume cirrus audio shield?)
+--> some sounds not there?
+--> backup startup files!!
+////////////////////
+
+--> reverse design
+
+--> wait for data
 
 --> impulse rid???
---> blib notes from net
 --> to much wifi (wifi with blip???)
---> maximize son
 
 --> negative direction on paper...?
 --> character pixel randomizer
@@ -111,7 +114,7 @@ q.pxlRes =  [350, 350];
 q.charBuffer = [111, 110, 113, 180, 32, 114, 116, 110, 80, 111, 110, 113, 180, 32, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 32, 113, 180, 111, 110, 113, 180, 114, 116, 110, 32, 80, 111, 110, 113, 180, 114, 116, 110, 80, 32, 111, 110, 113, 180, 114, 116, 32, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
 
 //variables printin
-q.printSpeed = 0.2; //duration of each step, min 0.04
+q.printSpeed = 0.15; //duration of each step, min 0.04
 q.stepsPerLine = 7;
 q.font = Font("Arial", 14);
 q.direct = 1;
@@ -245,7 +248,7 @@ Ndef.clear;
 ///WiFiAktivity (aka microphone Input)
 
 (
-Ndef(\wifi, { | amp = 3.5|
+Ndef(\wifi, { | amp = 3.2|
 	var in = SoundIn.ar(0) * 10;
 	var son = Limiter.ar(Compander.ar(in, in, 0.7, 		// threshold
 		1, 		// below threshold slope
@@ -260,7 +263,7 @@ Ndef(\wifi, { | amp = 3.5|
 //Ndef(\wifi).stop;
 
 (
-Ndef(\wifiLoop, { |amp = 2.0, start = 0, bufnum = 1, trig|
+Ndef(\wifiLoop, { |amp = 1.5, start = 0, bufnum = 1, trig|
 	var in = Ndef.ar(\wifi, 1, 0) ;
 	var son = PanAz.ar(2, in,
 		Duty.kr(1, 0, Drand([-1, -0.5, 0.0, 0.5], inf)),
@@ -276,7 +279,7 @@ Ndef(\wifiLoop, { |amp = 2.0, start = 0, bufnum = 1, trig|
 
 //droneOndesModulation
 
-Ndef(\droneOndes, { |amp = 0.2|
+Ndef(\droneOndes, { |amp = 0.5|
 	var freqs = q.nextFreqs;
 	var in = Ndef.ar(\wifi, 1, 0) ;
 	var analyze = Amplitude.ar(in);
@@ -295,7 +298,7 @@ Ndef(\droneOndes, { |amp = 0.2|
 //impulse Rythm
 
 (
-Ndef(\impulseRid, { |amp = 0.9|
+Ndef(\impulseRid, { |amp = 1.1|
 	var son = PanAz.ar(
 		2,                 // numChans
 		Impulse.ar(Duty.kr(0.1, 0,
@@ -323,7 +326,7 @@ Pdef(\impulseRid,
 //Ndef(\impulseRid).stop;
 
 (
-Ndef(\blipRid, { |amp = 0.9|
+Ndef(\blipRid, { |amp = 1.1|
 	var son = PanAz.ar(
 		2,                 // numChans
 		Blip.ar(0.5, 100 * SinOsc.kr(0.01).range(0.8, 10)),     // in
@@ -354,7 +357,7 @@ Pdef(\blipRid,
 Tdef(\droneSin, {
 	loop{
 		Ndef(\sin, {
-			var son = SinOsc.ar(q.nextFreqs.choose, 0, Rand(0.6, 0.9), 0.5);
+			var son = SinOsc.ar(q.nextFreqs.choose, 0, Rand(0.6, 0.9), 0.8);
 			//son = son * (Ndef.ar(\wifi, 1, 0) * 2);
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
@@ -373,7 +376,7 @@ Tdef(\droneSin, {
 Tdef(\dronePulse, {
 	loop{
 		Ndef(\pulse, {
-			var son = LFPulse.ar(q.nextFreqs.choose, 0, Rand(0.5, 1), 0.2);
+			var son = LFPulse.ar(q.nextFreqs.choose, 0, Rand(0.5, 1), 0.4);
 			//son = RLPF.ar(son, 1000, 0.5);
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
@@ -394,7 +397,7 @@ Tdef(\dronePulse, {
 Ndef(\delay, {
 	var input, delayTime, outDelay;
 	// input from sound card
-	input = Ndef.ar(\wifi, 1, 0) * 2.0;
+	input = Ndef.ar(\wifi, 1, 0) * 1.6;
 	// delay time jumps every 2 seconds
 	delayTime = Demand.kr(Impulse.kr(0.2), 0, Dseq([0.4, 0.6, 0.9, 0.3, 0.7], inf));
 	// CombC - delay with feedback
@@ -482,7 +485,6 @@ Tdef(\boucle, {
 		q.arduino.send($w, $d, 2, 0);
 		*/
 
-		Tdef(\printer).pause;
 		0.1.wait;
 		q.nextFreqs;
 		0.1.wait;
@@ -500,7 +502,10 @@ Tdef(\boucle, {
 		chooser[0].play;
 		try{ chooser[1].play; };
 
-		rrand(15, 45).wait;
+		rrand(2, 10).wait;
+		Tdef(\printer).resume;
+
+		rrand(15, 60).wait;
 
 		Ndef(\wifiLoop).stop(rrand(15, 30));
 		0.1.wait;
@@ -520,8 +525,10 @@ Tdef(\boucle, {
 		0.1.wait;
 		Tdef(\dronePulse).stop;
 		0.1.wait;
-		Tdef(\printer).resume;
-		rrand(15, 30).wait;
+
+		rrand(2, 10).wait;
+		Tdef(\printer).pause;
+		rrand(8, 30).wait;
 
 
 	};

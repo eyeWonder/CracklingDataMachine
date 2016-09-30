@@ -8,10 +8,52 @@ sudo sclang /home/pi/Desktop/main_2_03/main_2_03_arduino.scd
 headless!!!
 
 sudo Xvfb :1 -screen 0 1024x768x24
-export DISPLAY=":1"
+export DISPLAY=:1
 sudo processing-java --sketch=/home/pi/Desktop/cdm_2_2_5 --output=/home/pi/Desktop/p5output --force --run
 sudo /home/pi/bin/Playback_to_Lineout.sh -d
 sudo /home/pi/bin/Record_from_lineIn_Micbias.sh -d
 jackd -P75 -dalsa -dhw:0 -p2048 -n8 -s -r44100
 export DISPLAY=:0.0
-sclang /home/pi/Desktop/cdm_2_2_5/main_2_08.scd
+sclang /home/pi/Desktop/cdm_2_2_5/main_2_09.scd
+
+
+//processes that have to run
+root      1016  1003  0 11:20 pts/1    00:00:00 sudo Xvfb :1 -screen 0 1024x768x24
+root      1020  1016  4 11:20 pts/1    00:00:11 Xvfb :1 -screen 0 1024x768x24
+root      1028   526  0 11:21 ?        00:00:00 sshd: pi [priv]     
+pi        1035  1028  0 11:21 ?        00:00:00 sshd: pi@pts/2      
+pi        1037  1035  0 11:21 pts/2    00:00:00 -bash
+root      1048  1037  0 11:22 pts/2    00:00:00 sudo processing-java --sketch=/home/pi/Desktop/cdm_2_2_
+root      1052  1048  0 11:22 pts/2    00:00:00 /bin/sh /usr/local/bin/processing-java --sketch=/home/p
+root      1060  1052  4 11:22 pts/2    00:00:08 java -Djna.nosys=true -Djava.ext.dirs=/usr/local/lib/pr
+root      1075  1060  8 11:22 pts/2    00:00:17 /usr/local/lib/processing-3.2.1/java/bin/java -agentlib
+root      1090     1  0 11:22 pts/2    00:00:00 dbus-launch --autolaunch=18634e1404184594bc66ddacfba0bf
+root      1093     1  0 11:22 ?        00:00:00 /usr/bin/dbus-daemon --fork --print-pid 5 --print-addre
+root      1115   526  0 11:22 ?        00:00:00 sshd: pi [priv]     
+pi        1122  1115  0 11:22 ?        00:00:00 sshd: pi@pts/3      
+pi        1124  1122  0 11:22 pts/3    00:00:00 -bash
+root      1181   526  0 11:23 ?        00:00:00 sshd: pi [priv]     
+pi        1188  1181  0 11:23 ?        00:00:00 sshd: pi@pts/4      
+pi        1190  1188  0 11:23 pts/4    00:00:00 -bash
+root      1203  1124  0 11:24 pts/3    00:00:00 sudo -u pi jackd -P75 -dalsa -dhw:0 -p2048 -n8 -s -r441
+pi        1207  1203  0 11:24 ?        00:00:00 jackd -P75 -dalsa -dhw:0 -p2048 -n8 -s -r44100
+root      1212  1190  0 11:25 pts/4    00:00:00 sudo -u pi sclang /home/pi/Desktop/cdm_2_2_5/main_2_09.
+pi        1216  1212 33 11:25 pts/4    00:00:03 sclang /home/pi/Desktop/cdm_2_2_5/main_2_09.scd
+pi        1231  1216 16 11:25 pts/4    00:00:00 scsynth -u 57110 -a 116 -i 2 -o 2 -b 1026 -z 512 -m 655
+pi        1240   983  0 11:25 pts/0    00:00:00 ps -ef
+
+
+#!/bin/sh
+sudo Xvfb :1 -screen 0 1024x768x24
+sleep 1
+export DISPLAY=:1 && sudo processing-java --sketch=/home/pi/Desktop/cdm_2_2_5 --output=/home/pi/Desktop/p5output --force --run
+sleep 30
+sudo /home/pi/bin/Playback_to_Lineout.sh -d
+sleep 1
+sudo /home/pi/bin/Record_from_lineIn_Micbias.sh -d
+sleep 1
+sudo -u  pi jackd -P75 -dalsa -dhw:0 -p2048 -n8 -s -r44100
+sleep 1
+export DISPLAY=:0.0 && sudo -u pi sclang -D /home/pi/Desktop/cdm_2_2_5/main_2_09.scd
+
+
