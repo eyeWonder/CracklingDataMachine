@@ -44,12 +44,13 @@ Tdef(\setup, {
 
 	//printSetup: head position
 	q.arduino.send($r, $b);
-	1.wait;
+	2.wait;
 	while({ q.crashRX == 1 },
-		{ q.arduino.send($w, $s, 1, q.direct-1);
-			0.05.wait;
+		{
 			q.arduino.send($r, $b);
-			0.05.wait;
+			0.1.wait;
+			q.arduino.send($w, $s, 1, q.direct-1);
+			0.1.wait;
 	});
 
 	//printSetup: take paper
@@ -78,11 +79,11 @@ q = ();   //set variable as dictionary
 //////////////////////////////////////////
 //Serial Communication for Arduino
 
-q.crashRX; //dictionary variable for crash sensor
+q.crashRX = 1; //dictionary variable for crash sensor
 
 (
 q.arduino = ArduinoSMS(
-	"/dev/ttyUSB0",    //edit to match your port. SerialPort.listDevices
+	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
 	baudrate: 38400    //check that baudrate is the same as in arduino sketch
 );
 q.arduino.action = { |... msg| q.crashRX = msg[0]; };
@@ -95,6 +96,7 @@ q.arduino.action = { |... msg| q.crashRX = msg[0]; };
 //q.arduino.send($w, $t, 1, 1); //stepper y (speed, steps)
 //q.arduino.send($w, $s, 1, 1); //stepper x (speed, steps)
 //q.arduino.send($w, $t, 7, 1); //stepper y (speed, steps)
+//q.arduino.send($r, $b); //button
 
 
 /////////////////////////////////
@@ -104,7 +106,7 @@ q.pxlRes =  [350, 350];
 q.charBuffer = [111, 110, 113, 180, 32, 114, 116, 110, 80, 111, 110, 113, 180, 32, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 32, 113, 180, 111, 110, 113, 180, 114, 116, 110, 32, 80, 111, 110, 113, 180, 114, 116, 110, 80, 32, 111, 110, 113, 180, 114, 116, 32, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
 
 //variables printin
-q.printSpeed = 0.13; //duration of each step, min 0.04
+q.printSpeed = 0.15; //duration of each step, min 0.04
 q.stepsPerLine = 7;
 q.font = Font("Arial", 14);
 q.direct = 1;
@@ -127,7 +129,7 @@ q.newImage = { |q|
 	q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
 	q.image.draw({
 		var xpos = 0, ypos = 0;
-		var xrand = rrand(-0.9, 1.9);
+		var xrand = rrand(-1.9, 1.9);
 		var yrand = rrand(1.7, 5.1);
 		q.wordBuffer.size.do{ |i|
 			xpos = xpos+(i*xrand);

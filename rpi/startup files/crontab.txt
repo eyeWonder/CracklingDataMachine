@@ -1,0 +1,6 @@
+@reboot /bin/bash /home/pi/autostart.sh
+@reboot . /home/pi/autostartP5.sh
+@reboot /bin/bash /home/pi/autostartJACK.sh
+@reboot . /home/pi/autostartSC.sh
+@reboot sudo date -s "Fri Oct 7 11:30:00 CEST 2016"
+00 19 * * * /bin/bash /home/pi/shutdown.sh
