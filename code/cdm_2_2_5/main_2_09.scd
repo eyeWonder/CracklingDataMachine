@@ -9,19 +9,9 @@
 ///////////////////
 TODO!!!!!!!!!!!!
 //!!!!!!!!!!!!!!!!!!!!!!!!!!
---> raspberry fast test (for print Routine)
---> shutdown test!!
---> maximize (? volume cirrus audio shield?)
---> some sounds not there?
---> backup startup files!!
-////////////////////
-
---> reverse design
-
 --> wait for data
 
 --> impulse rid???
---> to much wifi (wifi with blip???)
 
 --> negative direction on paper...?
 --> character pixel randomizer
@@ -92,7 +82,7 @@ q.crashRX; //dictionary variable for crash sensor
 
 (
 q.arduino = ArduinoSMS(
-	"/dev/ttyACM0",    //edit to match your port. SerialPort.listDevices
+	"/dev/ttyUSB0",    //edit to match your port. SerialPort.listDevices
 	baudrate: 38400    //check that baudrate is the same as in arduino sketch
 );
 q.arduino.action = { |... msg| q.crashRX = msg[0]; };
@@ -114,7 +104,7 @@ q.pxlRes =  [350, 350];
 q.charBuffer = [111, 110, 113, 180, 32, 114, 116, 110, 80, 111, 110, 113, 180, 32, 116, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80, 111, 32, 113, 180, 111, 110, 113, 180, 114, 116, 110, 32, 80, 111, 110, 113, 180, 114, 116, 110, 80, 32, 111, 110, 113, 180, 114, 116, 32, 110, 80, 111, 110, 113, 180, 114, 116, 110, 80];
 
 //variables printin
-q.printSpeed = 0.15; //duration of each step, min 0.04
+q.printSpeed = 0.13; //duration of each step, min 0.04
 q.stepsPerLine = 7;
 q.font = Font("Arial", 14);
 q.direct = 1;
@@ -137,18 +127,18 @@ q.newImage = { |q|
 	q.image = Image.new(q.pxlRes[0], q.pxlRes[1]);
 	q.image.draw({
 		var xpos = 0, ypos = 0;
-		var xrand = rrand(0.9, 1.9);
-		var yrand = rrand(1.1, 5.1);
+		var xrand = rrand(-0.9, 1.9);
+		var yrand = rrand(1.7, 5.1);
 		q.wordBuffer.size.do{ |i|
 			xpos = xpos+(i*xrand);
 			ypos = ypos+yrand;
 			Pen.stringAtPoint(q.wordBuffer[i], Point(xpos, ypos), q.font, Color.black);
 			if(xpos >= q.pxlRes[0], { xpos = 0 });
+			if(xpos < 0, { xpos =  q.pxlRes[0]-1});
 			if(ypos >= q.pxlRes[1], { ypos = 0 });
-			//if(xpos <= 0, { xpos =  q.pxlRes[0]-1});
 		};
 		Pen.fill;
-	}); //plot(freeOnClose:true, background:Color.white);
+	});//.plot(freeOnClose:true, background:Color.white);
 	q.imagePixel = q.image.pixels;
 	q.image.free;
 };
@@ -357,7 +347,7 @@ Pdef(\blipRid,
 Tdef(\droneSin, {
 	loop{
 		Ndef(\sin, {
-			var son = SinOsc.ar(q.nextFreqs.choose, 0, Rand(0.6, 0.9), 0.8);
+			var son = SinOsc.ar(q.nextFreqs.choose * 1.25, 0, Rand(0.6, 0.9), 0.8);
 			//son = son * (Ndef.ar(\wifi, 1, 0) * 2);
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
@@ -376,7 +366,7 @@ Tdef(\droneSin, {
 Tdef(\dronePulse, {
 	loop{
 		Ndef(\pulse, {
-			var son = LFPulse.ar(q.nextFreqs.choose, 0, Rand(0.5, 1), 0.4);
+			var son = LFPulse.ar(q.nextFreqs.choose, 0, Rand(0.5, 1), 0.5);
 			//son = RLPF.ar(son, 1000, 0.5);
 			Out.ar(0, PanAz.ar(2, son,
 				Duty.kr(LFPulse.kr(WhiteNoise.kr().range(0.1, 2.0)).range(3.0, 0.001), 0,
@@ -508,23 +498,23 @@ Tdef(\boucle, {
 		rrand(15, 60).wait;
 
 		Ndef(\wifiLoop).stop(rrand(15, 30));
-		0.1.wait;
+		0.15.wait;
 		Ndef(\droneOndes).stop(rrand(15, 30));
-		0.1.wait;
+		0.15.wait;
 		Ndef(\impulseRid).stop(rrand(15, 30));
-		0.1.wait;
+		0.15.wait;
 		Pdef(\impulseRid).stop;
-		0.1.wait;
+		0.15.wait;
 		Ndef(\blipRid).stop(rrand(15, 30));
-		0.1.wait;
+		0.15.wait;
 		Pdef(\blipRid).stop;
-		0.1.wait;
+		0.15.wait;
 		Ndef(\delay).stop(rrand(15, 30));
-		0.1.wait;
+		0.15.wait;
 		Tdef(\droneSin).stop;
-		0.1.wait;
+		0.15.wait;
 		Tdef(\dronePulse).stop;
-		0.1.wait;
+		0.15.wait;
 
 		rrand(2, 10).wait;
 		Tdef(\printer).pause;

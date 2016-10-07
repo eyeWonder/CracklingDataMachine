@@ -1,0 +1,5 @@
+@reboot /bin/bash /home/pi/autostart.sh
+@reboot . /home/pi/autostartP5.sh
+@reboot /bin/bash /home/pi/autostartJACK.sh
+@reboot . /home/pi/autostartSC.sh
+00 19 * * * /bin/bash /home/pi/shutdown.sh

@@ -1,0 +1,7 @@
+#Playback from RPi to LineOut  
+amixer -q -Dhw:sndrpiwsp cset name='HPOUT2 Digital Switch' on  
+amixer -q -Dhw:sndrpiwsp cset name='HPOUT2 Digital Volume' 128 # 128=0dB. Volume control in 0.5 dB steps, -64dB to +32dB. Valid values 0-191. 108 = -10dB.  
+amixer -q -Dhw:sndrpiwsp cset name='HPOUT2L Input 1' AIF1RX1  
+amixer -q -Dhw:sndrpiwsp cset name='HPOUT2L Input 1 Volume' 32  # Input gain in 1 dB steps. -32dB to +12dB. Valid values 0-48. 32=0dB
+amixer -q -Dhw:sndrpiwsp cset name='HPOUT2R Input 1' AIF1RX2  
+amixer -q -Dhw:sndrpiwsp cset name='HPOUT2R Input 1 Volume' 32  
