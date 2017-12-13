@@ -12,6 +12,7 @@ sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
 
 ping raspberrypi.local
 ssh pi@10.42.0.xx
+pass cdm11235cdm
 
 
 _remote desktop
